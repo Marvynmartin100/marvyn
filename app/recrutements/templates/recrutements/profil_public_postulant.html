@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'recrutements/css/profil_public_postulant.css' %}">
+  <title>Profil public — {{ user.get_full_name }}</title>
+</head>
+<body>
+
+  <main class="main-content">
+
+    <!-- Fil d’Ariane -->
+    <nav class="breadcrumb">
+      <a href="{% url 'espace_postulant' %}">Accueil</a> › <span>Profil public</span>
+    </nav>
+
+    <div class="profil-container">
+
+      <!-- ==== IDENTITÉ ==== -->
+      <section class="profil-section identite card">
+        <div class="profil-header">
+          {% if profil.photo %}
+            <img src="{{ profil.photo.url }}" alt="Photo de {{ user.get_full_name }}" class="profil-photo">
+          {% else %}
+            <img src="{% static 'images/default.png' %}" alt="Photo par défaut" class="profil-photo">
+          {% endif %}
+
+          <div class="profil-infos">
+            <div class="info-row">
+              <span class="info-label">Nom complet :</span>
+              <span class="info-value">{{ user.first_name }} {{ user.last_name }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Âge :</span>
+              <span class="info-value">{{ profil.age|default:"Non précisé" }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Sexe :</span>
+              <span class="info-value">{{ profil.get_sexe_display|default:"Non précisé" }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Nationalité :</span>
+              <span class="info-value">{{ profil.get_nationalite_display|default:"Non précisée" }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==== À PROPOS ==== -->
+      <section class="profil-section apropos card">
+        <header>
+          <h3>🧾 À propos du postulant</h3>
+        </header>
+        <div class="section-content">
+          <p class="bio">{{ postulant.bio_postulant|default:"Aucune biographie renseignée pour le moment." }}</p>
+
+          <div class="competences">
+            <h4>Compétences</h4>
+            <ul>
+              {% for competence in competences %}
+                <li>{{ competence.libelle }} — <span class="niveau">{{ competence.niveau }}</span></li>
+              {% empty %}
+                <li>Aucune compétence renseignée.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==== DOCUMENTS ==== -->
+      <section class="profil-section documents card">
+        <header>
+          <h3>📄 Documents professionnels</h3>
+        </header>
+        <div class="section-content">
+          <div class="info-row">
+            <span class="info-label">CV :</span>
+            {% if postulant.cv %}
+              <a href="{{ postulant.cv.url }}" target="_blank" class="doc-link">Voir le CV</a>
+            {% else %}
+              <span class="info-value">Aucun CV disponible</span>
+            {% endif %}
+          </div>
+          <div class="info-row">
+            <span class="info-label">Lettre de motivation :</span>
+            {% if postulant.lettre_motivation %}
+              <a href="{{ postulant.lettre_motivation.url }}" target="_blank" class="doc-link">Voir la lettre</a>
+            {% else %}
+              <span class="info-value">Aucune lettre disponible</span>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <!-- ==== LOCALISATION ==== -->
+      <section class="profil-section localisation card">
+        <header>
+          <h3>📍 Localisation</h3>
+        </header>
+        <div class="section-content">
+          <div class="info-row">
+            <span class="info-label">Province :</span>
+            <span class="info-value">{{ profil.province|default:"Non précisée" }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Arrondissement :</span>
+            <span class="info-value">{{ profil.arrondissement|default:"Non précisé" }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Quartier :</span>
+            <span class="info-value">{{ profil.quartier|default:"Non précisé" }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Téléphone :</span>
+            <span class="info-value">{{ profil.telephone|default:"Non renseigné" }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==== ACTIONS EMPLOYEUR ==== -->
+      <div class="actions-container">
+        <form method="post" action="{% url 'ajouter_favori_postulant' postulant.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-favori">Ajouter en favori</button>
+        </form>
+
+        <!-- Bouton pour ouvrir le formulaire de recommandation -->
+        <button type="button" class="btn-recommander" id="ouvrirRecommandation">
+          Recommander ce postulant
+        </button>
+      </div>
+
+      <!-- ==== FORMULAIRE DE RECOMMANDATION ==== -->
+      <div class="recommandation-modal" id="modalRecommandation" style="display:none;">
+        <div class="recommandation-contenu">
+          <h3>Recommander {{ user.first_name }} {{ user.last_name }}</h3>
+
+          <form method="post" action="{% url 'recommander_postulant' postulant.profil.slug %}">
+            {% csrf_token %}
+            <label for="offre">Choisissez une offre :</label>
+            <select name="offre_id" id="offre" required>
+              <option value="">-- Sélectionner une offre --</option>
+              {% for offre in offres %}
+                <option value="{{ offre.id }}">{{ offre.titre }}</option>
+              {% empty %}
+                <option disabled>Aucune offre disponible</option>
+              {% endfor %}
+            </select>
+
+            <button type="submit" class="btn-envoyer">Envoyer la recommandation</button>
+          </form>
+
+          <button type="button" class="btn-fermer" id="fermerRecommandation">Fermer</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+<script src="{% static 'recrutements/js/profil_public_postulant.js' %}"></script>
+</body>
+</html>

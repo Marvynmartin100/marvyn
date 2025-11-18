@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gérez vos conversations et messages avec les postulants">
+    <link rel="stylesheet" href="{% static 'messageries/css/liste_message_employeur.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Mes Conversations - Employeur</title>
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <div class="header-actions">
+                <a href="{% url 'espace_employeur' %}" class="back-button" aria-label="Retour à l'espace employeur">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à l'espace employeur
+                </a>
+            </div>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>Mes Conversations</h1>
+                    <p class="header-subtitle">Gérez vos échanges avec les postulants</p>
+                </div>
+                {% if conversations %}
+                <div class="conversation-stats">
+                    <span class="stat" id="total-conversations">
+                        <i class="fas fa-comments"></i>
+                        {{ conversations|length }} conversation{{ conversations|length|pluralize }}
+                    </span>
+                    <span class="stat" id="unread-conversations">
+                        <i class="fas fa-envelope"></i>
+                        <span id="unread-count">{{ unread_count }}</span> non lu{{ unread_count|pluralize }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <main class="conversations-container">
+            {% if conversations %}
+                <div class="conversations-controls">
+                    <div class="search-box">
+                        <input type="text"
+                               placeholder="Rechercher un postulant..."
+                               class="search-input"
+                               id="searchConversations">
+                        <button type="button" class="search-btn" aria-label="Rechercher">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="sort-options">
+                        <select class="sort-select" aria-label="Trier les conversations" id="sortConversations">
+                            <option value="recent">Plus récentes</option>
+                            <option value="ancien">Plus anciennes</option>
+                            <option value="unread">Non lues</option>
+                            <option value="read">Déjà lues</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Statistiques en temps réel -->
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="active-conversations">{{ conversations|length }}</span>
+                            <span class="stat-label">Conversations actives</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon unread">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="total-unread">{{ unread_count }}</span>
+                            <span class="stat-label">Messages non lus</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon recent">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="candidates-count">{{ conversations|length }}</span>
+                            <span class="stat-label">Candidats en discussion</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="conversations-list" id="conversationsList">
+                    {% for conv in conversations %}
+                    <article class="conversation-card {% if conv.unread_count %}unread{% endif %}"
+                             data-conversation-id="{{ conv.id }}"
+                             data-last-activity="{{ conv.updated_at|date:'c' }}"
+                             data-user="{{ conv.autre_utilisateur.username|lower }}"
+                             data-unread="{{ conv.unread_count }}"
+                             data-online="false">
+                        <a href="{% url 'conversation_detail' conv.id %}" class="conversation-link">
+                            <div class="conversation-avatar">
+                                <div class="avatar-placeholder candidate-avatar">
+                                    {{ conv.autre_utilisateur.username|first|upper }}
+                                    {% if conv.unread_count %}
+                                    <div class="online-indicator"></div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="conversation-content">
+                                <div class="conversation-header">
+                                    <div class="user-info">
+                                        <h2 class="username">{{ conv.autre_utilisateur.username }}</h2>
+                                        <span class="user-role">Postulant</span>
+                                    </div>
+                                    <div class="conversation-meta">
+                                        <time class="timestamp" datetime="{{ conv.updated_at|date:'c' }}">
+                                            {% if conv.updated_at|date:"Ymd" == now|date:"Ymd" %}
+                                                Aujourd'hui à {{ conv.updated_at|date:"H:i" }}
+                                            {% else %}
+                                                {{ conv.updated_at|date:"d/m/Y à H:i" }}
+                                            {% endif %}
+                                        </time>
+                                        {% if conv.unread_count %}
+                                        <span class="unread-badge" aria-label="{{ conv.unread_count }} message{{ conv.unread_count|pluralize }} non lu{{ conv.unread_count|pluralize }}">
+                                            <i class="fas fa-envelope"></i>
+                                            {{ conv.unread_count }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="conversation-preview">
+                                    {% if conv.dernier_message %}
+                                        <div class="message-preview">
+                                            <span class="sender {% if conv.dernier_message.expediteur == request.user %}self{% else %}other{% endif %}">
+                                                {% if conv.dernier_message.expediteur == request.user %}
+                                                    Vous :
+                                                {% else %}
+                                                    {{ conv.dernier_message.expediteur.username }} :
+                                                {% endif %}
+                                            </span>
+                                            <span class="message-content">
+                                                {{ conv.dernier_message.contenu|truncatechars:100 }}
+                                            </span>
+                                        </div>
+                                    {% else %}
+                                        <div class="no-messages">
+                                            <i class="fas fa-comment-slash"></i>
+                                            <em>Aucun message échangé</em>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="conversation-footer">
+                                    <div class="conversation-tags">
+                                        <span class="conversation-tag status">
+                                            <i class="fas fa-circle"></i>
+                                            Dernière activité : {{ conv.updated_at|timesince }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="conversation-actions">
+                                <a href="{% url 'profil_public_postulant' conv.autre_utilisateur.profil.slug %}"
+                                   class="action-btn candidate-profile-btn"
+                                   aria-label="Voir le profil du candidat"
+                                   title="Voir le profil">
+                                    <i class="fas fa-user-tie"></i>
+                                </a>
+                                <button class="action-btn favorite-btn"
+                                        data-conv-id="{{ conv.id }}"
+                                        aria-label="Marquer comme favori">
+                                    <i class="far fa-star"></i>
+                                </button>
+                                <div class="conversation-arrow">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                    {% endfor %}
+                </div>
+
+                <!-- Résumé du filtrage -->
+                <div class="filter-summary" id="filterSummary">
+                    <div class="summary-content">
+                        <span id="visibleCount">0</span> conversation(s) affichée(s)
+                        <button id="resetFilters" class="cta-button secondary btn-sm">
+                            <i class="fas fa-redo"></i>
+                            Réinitialiser
+                        </button>
+                    </div>
+                </div>
+
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h2 class="empty-title">Aucune conversation</h2>
+                    <p class="empty-message">
+                        Vous n'avez pas encore de conversation avec des postulants.<br>
+                        Les conversations seront créées automatiquement lorsque les candidats répondront à vos offres ou recommandations.
+                    </p>
+                    <div class="empty-actions">
+                        <a href="{% url 'liste_offres' %}" class="cta-button primary">
+                            <i class="fas fa-briefcase"></i>
+                            Gérer mes offres
+                        </a>
+                        <a href="{% url 'liste_postulant' %}" class="cta-button secondary">
+                            <i class="fas fa-search"></i>
+                            Rechercher des candidats
+                        </a>
+                        <a href="{% url 'mes_recommandations_employeur' %}" class="cta-button secondary">
+                            <i class="fas fa-paper-plane"></i>
+                            Voir mes recommandations
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </main>
+    </div>
+
+
+
+    <script src="{% static 'messageries/js/liste_conversation_employeur.js' %}"></script>
+</body>
+</html>

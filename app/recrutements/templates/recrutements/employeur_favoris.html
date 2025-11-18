@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mes candidats favoris</title>
+  <link rel="stylesheet" href="{% static 'recrutements/css/employeur_favoris.css' %}">
+</head>
+<body>
+
+  <main class="favoris-container">
+    <h2>👤 Mes postulants favoris</h2>
+
+    {% if favoris %}
+      <div class="favoris-list">
+        {% for favori in favoris %}
+          <div class="favori-card">
+            <h3>{{ favori.postulant.profil.user.first_name }} {{ favori.postulant.profil.user.last_name }}</h3>
+            <p>Ajouté le : {{ favori.created_at|date:"d/m/Y" }}</p>
+
+            {% if favori.postulant.profil and favori.postulant.profil.slug %}
+              <a href="{% url 'profil_public_postulant' favori.postulant.profil.slug %}" class="btn-detail">
+                Voir le profil public →
+              </a>
+              <a href="{% url 'retirer_favori_postulant' favori.id %}" class="btn-retirer">
+                Retirer
+              </a>
+            {% else %}
+              <span class="text-gray-400 italic">Profil incomplet</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Aucun postulant ajouté en favori pour le moment.</p>
+    {% endif %}
+
+  </main>
+
+</body>
+</html>

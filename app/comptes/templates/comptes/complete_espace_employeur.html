@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'comptes/css/complete_espace_employeur.css' %}">
+  <title>Compléter mon profil</title>
+</head>
+<body>
+
+  <header>
+    <h2>🧾 Compléter mon profil</h2>
+    <p>Modifiez uniquement les sections que vous souhaitez mettre à jour.</p>
+  </header>
+
+  <main>
+
+    <!-- ==================== PHOTO ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">📸 Photo de profil</button>
+      <div class="accordion-content" hidden>
+        {% if messages %}
+          <div class="message-box">
+            {% for message in messages %}
+              {% if message.tags == 'photo_success' or message.tags == 'photo_error' %}
+                <p>{{ message }}</p>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ photo_form.as_p }}
+          {% if profil.photo %}
+            <img src="{{ profil.photo.url }}" alt="Photo actuelle" style="max-width:150px; height:auto; border-radius:8px;">
+
+          {% endif %}
+          <button type="submit" name="update_photo">Enregistrer la photo</button>
+        </form>
+
+        <details class="conseil">
+          <summary>💬 Conseil</summary>
+          <p>Choisissez une photo claire, professionnelle et bien cadrée sur fond neutre.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== BIOGRAPHIE ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">🧾 Biographie</button>
+      <div class="accordion-content" hidden>
+        {% if messages %}
+          <div class="message-box">
+            {% for message in messages %}
+              {% if message.tags == 'bio_success' or message.tags == 'bio_error' %}
+                <p>{{ message }}</p>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="{{ bio_form.bio_employeur.id_for_label }}">Votre biographie :</label>
+            {{ bio_form.bio_employeur }}
+          </div>
+          <button type="submit" name="update_biographie">Enregistrer la biographie</button>
+        </form>
+
+        <details class="conseil">
+          <summary>💬 Conseil</summary>
+          <p>Présentez brièvement votre parcours, vos compétences clés et vos objectifs professionnels.</p>
+        </details>
+      </div>
+    </section>
+
+
+
+    <!-- ==================== TÉLÉPHONE ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">📞 Téléphone</button>
+      <div class="accordion-content" hidden>
+        {% if messages %}
+          <div class="message-box">
+            {% for message in messages %}
+              {% if message.tags == 'telephone_success' or message.tags == 'telephone_error' %}
+                <p>{{ message }}</p>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="{{ telephone_form.telephone.id_for_label }}">Téléphone :</label>
+            {{ telephone_form.telephone }}
+          </div>
+          <button type="submit" name="update_telephone">Mettre à jour le téléphone</button>
+        </form>
+
+        <details class="conseil">
+          <summary>💬 Conseil</summary>
+          <p>Utilisez un numéro valide et joignable pour que les recruteurs puissent vous contacter facilement.</p>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="{% static 'comptes/js/complete_espace_postulant.js' %}"></script>
+</body>
+</html>

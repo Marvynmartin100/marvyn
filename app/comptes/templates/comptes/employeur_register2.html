@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'comptes/css/employeur_register2.css' %}">
+    <title>Création de compte - Étape 2</title>
+</head>
+<body>
+
+    <!-- ===== Conteneur principal ===== -->
+    <div class="register-container">
+
+        <!-- ===== En-tête ===== -->
+        <header class="register-header">
+            <div class="header-logo">
+                <!-- Exemple : <img src="{% static 'img/logo.png' %}" alt="Logo du site"> -->
+            </div>
+            <h1 class="header-title">Création de compte</h1>
+            <p class="header-subtitle">Étape 2 : Informations personnelles</p>
+        </header>
+
+        <!-- ===== Zone de messages Django ===== -->
+        <section class="register-messages">
+            {% if messages %}
+                <ul class="message-list">
+                    {% for message in messages %}
+                        <li class="message-item {{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+
+        <!-- ===== Formulaire principal ===== -->
+        <main class="register-form-section">
+            <form method="post" class="register-form" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <div class="form-fields">
+
+                    <!-- Sexe -->
+                    <div class="form-group">
+                        <label for="id_sexe" class="form-label">Sexe</label>
+                        <div class="input-wrapper">
+                            {{ form.sexe }}
+                            {% if form.sexe.errors %}
+                                <ul class="error-list">
+                                    {% for error in form.sexe.errors %}
+                                        <li class="error-text">{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Date de naissance -->
+                    <div class="form-group">
+                        <label for="id_date_naissance" class="form-label">Date de naissance</label>
+                        <div class="input-wrapper">
+                            {{ form.date_naissance }}
+                            {% if form.date_naissance.errors %}
+                                <ul class="error-list">
+                                    {% for error in form.date_naissance.errors %}
+                                        <li class="error-text">{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Téléphone -->
+                    <div class="form-group">
+                        <label for="id_telephone" class="form-label">Téléphone</label>
+                        <div class="input-wrapper">
+                            {{ form.telephone }}
+                            {% if form.telephone.errors %}
+                                <ul class="error-list">
+                                    {% for error in form.telephone.errors %}
+                                        <li class="error-text">{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Nationalité -->
+                    <div class="form-group">
+                        <label for="id_nationalite" class="form-label">Nationalité</label>
+                        <div class="input-wrapper">
+                            {{ form.nationalite }}
+                            {% if form.nationalite.errors %}
+                                <ul class="error-list">
+                                    {% for error in form.nationalite.errors %}
+                                        <li class="error-text">{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ===== Bouton d’action ===== -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Suivant</button>
+                </div>
+
+            </form>
+        </main>
+    </div>
+
+</body>
+</html>

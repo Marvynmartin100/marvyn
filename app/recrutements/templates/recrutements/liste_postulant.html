@@ -1,0 +1,387 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'recrutements/css/liste_postulant.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Talents Disponibles | Plateforme Recrutement</title>
+</head>
+<body>
+    <div class="container">
+
+        <!-- En-tête principal -->
+        <header class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <i class="fas fa-search"></i>
+                    Découvrez nos Talents
+                </h1>
+                <p class="hero-subtitle">
+                    Des profils exceptionnels prêts à rejoindre votre équipe
+                </p>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-bubble">
+                    <span class="stat-number">{{ postulants|length }}</span>
+                    <span class="stat-label">Talents Disponibles</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Section de recherche et filtres -->
+        <section class="search-filters">
+            <!-- Barre de recherche principale -->
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input
+                        type="text"
+                        id="global-search"
+                        placeholder="Rechercher un talent par nom, compétence, localisation..."
+                        class="search-input"
+                        value="{{ request.GET.q|default:'' }}"
+                    >
+                    <button class="search-btn" id="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulaire de filtres caché pour la soumission -->
+            <form method="GET" id="filters-form" style="display: none;">
+                <input type="hidden" name="q" id="search-query" value="{{ request.GET.q|default:'' }}">
+                <input type="hidden" name="genre" id="filter-gender-value" value="{{ request.GET.genre|default:'' }}">
+                <input type="hidden" name="age" id="filter-age-value" value="{{ request.GET.age|default:'' }}">
+                <input type="hidden" name="nationalite" id="filter-nationality-value" value="{{ request.GET.nationalite|default:'' }}">
+                <input type="hidden" name="province" id="filter-province-value" value="{{ request.GET.province|default:'' }}">
+                <input type="hidden" name="arrondissement" id="filter-arrondissement-value" value="{{ request.GET.arrondissement|default:'' }}">
+                <input type="hidden" name="tri" id="sort-by-value" value="{{ request.GET.tri|default:'recent' }}">
+                <input type="hidden" name="page" id="page-number" value="{{ request.GET.page|default:1 }}">
+            </form>
+
+            <!-- Filtres rapides -->
+            <div class="quick-filters">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-venus-mars"></i>
+                        Genre
+                    </label>
+                    <select id="filter-gender" class="filter-select" data-filter="genre">
+                        <option value="all">Tous</option>
+                        <option value="M" {% if request.GET.genre == 'M' %}selected{% endif %}>Hommes</option>
+                        <option value="F" {% if request.GET.genre == 'F' %}selected{% endif %}>Femmes</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-user-clock"></i>
+                        Âge
+                    </label>
+                    <select id="filter-age" class="filter-select" data-filter="age">
+                        <option value="all">Tous les âges</option>
+                        <option value="18-25" {% if request.GET.age == '18-25' %}selected{% endif %}>18-25 ans</option>
+                        <option value="26-35" {% if request.GET.age == '26-35' %}selected{% endif %}>26-35 ans</option>
+                        <option value="36-45" {% if request.GET.age == '36-45' %}selected{% endif %}>36-45 ans</option>
+                        <option value="46-55" {% if request.GET.age == '46-55' %}selected{% endif %}>46-55 ans</option>
+                        <option value="55+" {% if request.GET.age == '55+' %}selected{% endif %}>55+ ans</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-flag"></i>
+                        Nationalité
+                    </label>
+                    <select id="filter-nationality" class="filter-select" data-filter="nationalite">
+                        <option value="all">Toutes nationalités</option>
+                        {% for code, nom in NATIONALITE_CHOICES %}
+                        <option value="{{ code }}" {% if request.GET.nationalite == code %}selected{% endif %}>{{ nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Province
+                    </label>
+                    <select id="filter-province" class="filter-select" data-filter="province">
+                        <option value="all">Toutes les provinces</option>
+                        {% for code, nom in CHOICE_PROVINCE %}
+                        <option value="{{ code }}" {% if request.GET.province == code %}selected{% endif %}>{{ nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-location-dot"></i>
+                        Arrondissement
+                    </label>
+                    <select id="filter-arrondissement" class="filter-select" data-filter="arrondissement">
+                        <option value="all">Tous les arrondissements</option>
+                        {% for code, nom in CHOICE_ARRONDISSEMENT %}
+                        <option value="{{ code }}" {% if request.GET.arrondissement == code %}selected{% endif %}>{{ nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Contrôle de tri -->
+                <div class="sort-control">
+                    <label class="sort-label">
+                        <i class="fas fa-sort-amount-down"></i>
+                        Trier par
+                    </label>
+                    <select id="sort-by" class="sort-select" data-filter="tri">
+                        <option value="recent" {% if request.GET.tri == 'recent' or not request.GET.tri %}selected{% endif %}>Plus récent</option>
+                        <option value="name-asc" {% if request.GET.tri == 'name-asc' %}selected{% endif %}>Nom (A-Z)</option>
+                        <option value="name-desc" {% if request.GET.tri == 'name-desc' %}selected{% endif %}>Nom (Z-A)</option>
+                        <option value="age-asc" {% if request.GET.tri == 'age-asc' %}selected{% endif %}>Âge (croissant)</option>
+                        <option value="age-desc" {% if request.GET.tri == 'age-desc' %}selected{% endif %}>Âge (décroissant)</option>
+                    </select>
+                </div>
+
+                <!-- Boutons d'action des filtres -->
+                                <button type="button" class="filter-btn secondary" id="reset-filters">
+                        <i class="fas fa-redo"></i>
+                        Réinitialiser
+                    </button>
+            </div>
+        </section>
+
+        <!-- Section des options d'affichage et tri -->
+        <section class="display-options">
+            <div class="display-header">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i>
+                    Liste des Talents
+                    <span class="results-count">({{ postulants.paginator.count|default:postulants|length }} résultat{{ postulants.paginator.count|default:postulants|length|pluralize }})</span>
+                </h2>
+
+                <div class="display-controls">
+                    <!-- Options de vue -->
+                    <div class="view-options">
+                        <button class="view-option active" data-view="grid">
+                            <i class="fas fa-th"></i>
+                            Grille
+                        </button>
+                        <button class="view-option" data-view="list">
+                            <i class="fas fa-list"></i>
+                            Liste
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grille des postulants -->
+        <main class="postulants-grid-section">
+            <!-- Conteneur scrollable des cartes -->
+            <div class="postulants-scroll-container">
+                <div class="postulants-grid" id="postulants-container">
+                    {% if postulants %}
+                        {% for postulant in postulants %}
+                        <article class="talent-card"
+                                 data-postulant-id="{{ postulant.id }}"
+                                 data-age="{{ postulant.profil.age|default:0 }}"
+                                 data-gender="{{ postulant.profil.sexe }}"
+                                 data-nationalite="{{ postulant.profil.nationalite }}"
+                                 data-province="{{ postulant.province }}"
+                                 data-arrondissement="{{ postulant.arrondissement }}"
+                                 data-created="{{ postulant.created_at|date:'U' }}"
+                                 data-name="{{ postulant.profil.full_name|lower }}"
+                                 data-bio="{{ postulant.intro_postulant|default:''|lower }}">
+                            <!-- En-tête de la carte - Photo et nom alignés horizontalement -->
+                            <header class="card-header">
+                                <div class="profile-main-horizontal">
+                                    <div class="avatar-container">
+                                        {% if postulant.profil.photo %}
+                                        <img src="{{ postulant.profil.photo.url }}"
+                                             alt="{{ postulant.profil.full_name }}"
+                                             class="profile-avatar"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        {% endif %}
+                                        <div class="avatar-placeholder" {% if postulant.profil.photo %}style="display:none;"{% endif %}>
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="availability-dot" title="Disponible immédiatement"></div>
+                                    </div>
+
+                                    <div class="profile-info-horizontal">
+                                        <h3 class="profile-name">{{ postulant.profil.full_name }}</h3>
+                                        <div class="profile-meta-horizontal">
+                                            <span class="meta-item">
+                                                <i class="fas fa-birthday-cake"></i>
+                                                {{ postulant.profil.age|default:"N/A" }} ans
+                                            </span>
+                                            <span class="meta-item">
+                                                <i class="fas fa-{{ postulant.profil.sexe|lower }}"></i>
+                                                {{ postulant.profil.get_sexe_display }}
+                                            </span>
+                                            <span class="meta-item">
+                                                <i class="fas fa-globe-americas"></i>
+                                                {{ postulant.profil.get_nationalite_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <!-- Corps de la carte - Informations alignées horizontalement -->
+                            <div class="card-body-horizontal">
+                                <!-- Section Localisation -->
+                                <div class="info-row">
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <h4 class="info-title">Localisation</h4>
+                                            <p class="info-text">
+                                                <strong>{{ postulant.province|capfirst }}</strong>,
+                                                {{ postulant.arrondissement|capfirst }}
+                                                {% if postulant.quartier %}
+                                                - {{ postulant.quartier|capfirst }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Section Présentation -->
+                                    <div class="info-item">
+                                        <div class="info-icon">
+                                            <i class="fas fa-user-tie"></i>
+                                        </div>
+                                        <div class="info-content">
+                                            <h4 class="info-title">Présentation</h4>
+                                            <div class="bio-preview">
+                                                {% if postulant.intro_postulant %}
+                                                <p class="info-text">{{ postulant.intro_postulant|truncatewords:15 }}</p>
+                                                {% else %}
+                                                <p class="no-bio">Profil en cours de complétion...</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Pied de carte -->
+                            <footer class="card-footer">
+                                <div class="card-actions">
+                                    <a href="{% url 'profil_public_postulant' postulant.profil.slug %}"
+                                       class="btn btn-primary btn-view-profile">
+                                        <i class="fas fa-eye"></i>
+                                        Voir le profil complet
+                                    </a>
+                                </div>
+                            </footer>
+                        </article>
+                        {% endfor %}
+                    {% else %}
+                        <!-- État vide -->
+                        <div class="empty-state">
+                            <div class="empty-illustration">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="empty-content">
+                                <h3>Aucun talent disponible</h3>
+                                <p>Nous n'avons pas encore de postulants correspondant à vos critères.</p>
+                                <div class="empty-actions">
+                                    <button class="btn btn-primary" id="reset-all-filters">
+                                        <i class="fas fa-redo"></i>
+                                        Réinitialiser les filtres
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+
+        <!-- Pagination -->
+        {% if postulants.has_other_pages %}
+        <div class="pagination-container">
+            <div class="pagination">
+                {% if postulants.has_previous %}
+                    <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ postulants.previous_page_number }}"
+                       class="pagination-btn" data-page="{{ postulants.previous_page_number }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% endif %}
+
+                {% for num in postulants.paginator.page_range %}
+                    {% if postulants.number == num %}
+                        <span class="pagination-btn active">{{ num }}</span>
+                    {% elif num > postulants.number|add:'-3' and num < postulants.number|add:'3' %}
+                        <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}"
+                           class="pagination-btn" data-page="{{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if postulants.has_next %}
+                    <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ postulants.next_page_number }}"
+                       class="pagination-btn" data-page="{{ postulants.next_page_number }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation secondaire -->
+        <footer class="secondary-nav">
+            <div class="nav-container">
+                <a href="{% url 'liste_candidatures_employeur' %}" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    Mes Candidatures
+                </a>
+                <a href="{% url 'mes_recommandations_employeur' %}" class="nav-item">
+                    <i class="fas fa-star"></i>
+                    Recommandations
+                </a>
+                <a href="{% url 'espace_postulant' %}" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    Mon Espace
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Données pour JavaScript -->
+    <script>
+        // Configuration globale pour JavaScript
+        window.APP_CONFIG = {
+            urls: {
+                base: "{% url 'liste_postulant' %}",
+                profilPublic: "{% url 'profil_public_postulant' 'SLUG_PLACEHOLDER' %}"
+            },
+            filters: {
+                current: {
+                    q: "{{ request.GET.q|default:'' }}",
+                    genre: "{{ request.GET.genre|default:'' }}",
+                    age: "{{ request.GET.age|default:'' }}",
+                    nationalite: "{{ request.GET.nationalite|default:'' }}",
+                    province: "{{ request.GET.province|default:'' }}",
+                    arrondissement: "{{ request.GET.arrondissement|default:'' }}",
+                    tri: "{{ request.GET.tri|default:'recent' }}",
+                    page: "{{ request.GET.page|default:1 }}"
+                }
+            },
+            constants: {
+                nationalites: {{ NATIONALITE_CHOICES|safe }},
+                provinces: {{ CHOICE_PROVINCE|safe }},
+                arrondissements: {{ CHOICE_ARRONDISSEMENT|safe }},
+                sexes: {{ SEXE_CHOICES|safe }}
+            }
+        };
+    </script>
+
+    <script src="{% static 'recrutements/js/liste_postulant.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'recrutements/css/liste_offres.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Mes offres d'emploi - Espace Employeur</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Bouton de retour -->
+        <div class="back-button-container">
+            <a href="{% url 'espace_employeur' %}" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Retour à l'espace employeur
+            </a>
+        </div>
+
+        <!-- En-tête de page -->
+        <div class="page-header">
+            <h1>Mes offres d'emploi</h1>
+            <p class="page-subtitle">Gérez toutes les offres que vous avez publiées</p>
+        </div>
+
+        <!-- Bouton d'action principal -->
+        <div class="action-header">
+            <a href="{% url 'creer_offre_emploi' %}" class="btn btn-primary btn-large">
+                <i class="fas fa-plus"></i>
+                Publier une nouvelle offre
+            </a>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-number" id="total-offres">{{ offres|length }}</span>
+                <span class="stat-label">Total offres</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="active-count">{{ offres_active_count }}</span>
+                <span class="stat-label">Actives</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="expiree-count">{{ offres_expiree_count }}</span>
+                <span class="stat-label">Expirées</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="candidatures-count">{{ total_candidatures }}</span>
+                <span class="stat-label">Candidatures</span>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <h3 class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Filtrer les offres
+                </h3>
+                <div class="sort-options">
+                    <select id="statut-select" class="sort-select">
+                        <option value="all">Tous les statuts</option>
+                        <option value="active">Actives</option>
+                        <option value="expiree">Expirées</option>
+                    </select>
+
+                    <select id="type-contrat-select" class="sort-select">
+                        <option value="all">Tous les types de contrat</option>
+                        <option value="cdi">CDI</option>
+                        <option value="cdd">CDD</option>
+                        <option value="stage">Stage</option>
+                        <option value="freelance">Freelance</option>
+                    </select>
+
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Rechercher une offre..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteneur de défilement pour les offres -->
+        <div class="offres-scroll-container">
+            {% if offres %}
+                <ul class="offers-list" id="offers-list">
+                    {% for offre in offres %}
+                        <li class="offer-item"
+                            data-statut="{{ offre.statut|lower }}"
+                            data-type="{{ offre.type_contrat|lower }}"
+                            data-date="{{ offre.date_publication|date:'Y-m-d' }}"
+                            data-titre="{{ offre.titre|lower }}"
+                            data-candidatures="{{ offre.nombre_candidatures }}">
+                            <div class="offer-header">
+                                <div class="offer-title-section">
+                                    <h2 class="offer-title">{{ offre.titre }}</h2>
+                                    <div class="offer-meta-info">
+                                        <span class="meta-date">
+                                            <i class="far fa-calendar"></i>
+                                            Publiée le {{ offre.date_publication|date:"d/m/Y" }}
+                                        </span>
+                                        {% if offre.date_expiration %}
+                                        <span class="meta-date">
+                                            <i class="far fa-clock"></i>
+                                            Expire le {{ offre.date_expiration|date:"d/m/Y" }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="offer-indicators">
+                                    <span class="offer-badge type-{{ offre.type_contrat|lower }}">
+                                        {{ offre.get_type_contrat_display }}
+                                    </span>
+                                    <span class="statut-badge statut-{{ offre.statut|lower }}">
+                                        {{ offre.get_statut_display }}
+                                    </span>
+                                    {% if offre.nombre_candidatures > 0 %}
+                                    <div class="candidature-indicator" title="{{ offre.nombre_candidatures }} candidature(s)">
+                                        <div class="indicator-circle">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <span class="indicator-text">{{ offre.nombre_candidatures }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="offer-info">
+                                <div class="info-item">
+                                    <i class="fas fa-building"></i>
+                                    <strong>Domaine :</strong>
+                                    <span>{{ offre.domaine|default:"Non spécifié" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <strong>Lieu :</strong>
+                                    <span>{{ offre.quartier_emploie|default:"" }}, {{ offre.arrondissement_emploie|title }}, {{ offre.province_emploie|title }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <strong>Salaire :</strong>
+                                    <span>
+                                        {% if offre.salaire_propose %}
+                                            {{ offre.salaire_propose|floatformat:0 }} FCFA
+                                        {% else %}
+                                            Non précisé
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="offer-actions">
+                                <div class="offer-stats">
+                                    <div class="stat-item-small">
+                                        <i class="fas fa-eye"></i>
+                                        {{ offre.nombre_vues|default:0 }} vues
+                                    </div>
+                                    <div class="stat-item-small">
+                                        <i class="fas fa-users"></i>
+                                        {{ offre.nombre_candidatures|default:0 }} candidatures
+                                    </div>
+                                    {% if offre.date_expiration %}
+                                    <div class="stat-item-small">
+                                        <i class="fas fa-clock"></i>
+                                        {{ offre.jours_restants }} jours restants
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="action-buttons">
+                                    <a href="{% url 'detail_offre_employeur' offre.slug %}" class="btn btn-primary">
+                                        <i class="fas fa-eye"></i>
+                                        Voir détails
+                                    </a>
+
+                                    <button class="btn btn-danger btn-supprimer" data-id="{{ offre.id }}" data-titre="{{ offre.titre }}">
+                                        <i class="fas fa-trash"></i>
+                                        Supprimer
+                                    </button>
+
+                                    <button class="btn btn-warning btn-relancer" data-id="{{ offre.id }}">
+                                        <i class="fas fa-redo"></i>
+                                        Relancer
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            {% else %}
+                <!-- État vide -->
+                <div class="empty-state">
+                    <i class="fas fa-briefcase"></i>
+                    <h3>Aucune offre publiée</h3>
+                    <p>Vous n'avez pas encore publié d'offre d'emploi. Commencez par créer votre première offre !</p>
+                    <div class="empty-actions">
+                        <a href="{% url 'creer_offre_emploi' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Publier ma première offre
+                        </a>
+                        <a href="{% url 'espace_employeur' %}" class="btn btn-secondary">
+                            <i class="fas fa-user"></i>
+                            Retour à mon espace
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Actions supplémentaires -->
+        <div class="footer-actions">
+            <a href="{% url 'espace_employeur' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Retour à l'espace employeur
+            </a>
+            <a href="{% url 'liste_candidatures_employeur' %}" class="btn btn-outline">
+                <i class="fas fa-file-alt"></i>
+                Voir toutes les candidatures
+            </a>
+        </div>
+    </div>
+
+    <!-- Script JavaScript -->
+    <script src="{% static 'recrutements/js/liste_offre.js' %}"></script>
+
+</body>
+</html>

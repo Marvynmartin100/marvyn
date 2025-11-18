@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="7d4cc983-4127-4a41-a653-ec51d7d9ac9d" name="projet_Gabonworkera">
+        <fileTransfer rootFolder="/var/www/Yannstinger/user/marvyn" accessType="SFTP" host="195.35.3.54" port="22" sshConfigId="0f2401e7-1fc7-4759-8042-f03298aa6127" sshConfig="marvyn@195.35.3.54:22 agent" authAgent="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

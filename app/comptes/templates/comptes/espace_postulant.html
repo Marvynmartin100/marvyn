@@ -1,0 +1,180 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'comptes/css/espace_postulant.css' %}">
+  <title>Espace Postulant</title>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu">☰</button>
+      <h2>Bienvenue, {{ user.first_name }} {{ user.last_name }}</h2>
+    </div>
+
+    <div class="header-right">
+      {% if profil.photo %}
+        <img src="{{ profil.photo.url }}" alt="Photo de {{ user.get_full_name }}" class="header-photo">
+      {% endif %}
+      <a href="{% url 'notification_postulant' %}" class="notification-icon">🔔</a>
+      <form action="{% url 'deconnexion' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="logout-button">Se déconnecter</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <nav>
+      <ul>
+        <li><a href="{% url 'espace_postulant' %}">📊 Mon espace</a></li>
+        <li><a href="{% url 'complete_espace_postulant' %}">✏️ Compléter mon profil</a></li>
+        <li><a href="{% url 'connexion' %}">📁 Dashbord</a></li>
+        <li><a href="{% url 'liste_candidatures' %}">📝 Mes candidatures</a></li>
+        <li><a href="{% url 'liste_offre_postulant' %}">🔍 Explorer les offres</a></li>
+        <li><a href="{% url 'liste_conversations_postulant' %}">💬 Messages</a></li>
+        <li><a href="{% url 'notification_postulant' %}">🔔 Notifications</a></li>
+        <li><a href="{% url 'mes_recommandations_postulant' %}">⭐ Mes recommandations</a></li>
+        <li><a href="{% url 'connexion' %}">❓ Aide & Ressources</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+
+    <!-- Fil d'Ariane -->
+    <nav class="breadcrumb">
+      <a href="{% url 'espace_postulant' %}">Accueil</a>
+      <span class="breadcrumb-separator">›</span>
+      <span>Profil public</span>
+    </nav>
+
+    <div class="profil-container">
+
+      <!-- ==== SECTION IDENTITÉ ÉTENDUE AVEC INFORMATIONS PERSONNELLES ==== -->
+      <section class="profil-identite">
+        <div class="profil-photo-container">
+          {% if user.profil.photo %}
+            <img src="{{ profil.photo.url }}" alt="Photo de {{ user.get_full_name }}" class="profil-photo">
+            <div class="profil-status"></div>
+          {% endif %}
+        </div>
+
+        <div class="profil-infos">
+            <p class="profil-title">Postulant</p>
+          <h1 class="profil-name">{{ user.first_name }} {{ user.last_name }}</h1>
+
+          <div class="profil-badges">
+            <span class="badge">Disponible</span>
+            <span class="badge">{{ profil.get_nationalite_display }}</span>
+            <span class="badge">{{ profil.get_sexe_display|default:"Non précisé" }}</span>
+            <span class="badge">Age : {{ profil.age }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==== CONTENU PRINCIPAL EN GRID ==== -->
+      <div class="profil-content">
+
+        <!-- ==== À PROPOS ET COMPÉTENCES (PLEINE LARGEUR) ==== -->
+        <section class="profil-section full-width">
+          <div class="section-header">
+            <h3>👤 À Propos</h3>
+          </div>
+          <div class="bio-content">
+            <div class="bio-section">
+              <h4>Introduction</h4>
+              <p class="bio">{{ postulant.intro_postulant|default:"Aucune introduction renseignée pour le moment." }}</p>
+            </div>
+            <div class="bio-section">
+              <h4>Biographie</h4>
+              <p class="bio">{{ postulant.bio_postulant|default:"Aucune biographie renseignée pour le moment." }}</p>
+            </div>
+
+            <div class="competences-section">
+              <h4>Compétences</h4>
+              <div class="competences-list">
+                {% for competence in competences %}
+                  <span class="competence-tag">{{ competence.libelle }} ({{ competence.niveau }})</span>
+                {% empty %}
+                  <span class="competence-tag">Aucune compétence renseignée</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==== DOCUMENTS PROFESSIONNELS ==== -->
+        <section class="profil-section">
+          <h3>📁 Documents</h3>
+          <div class="documents-horizontal">
+            <!-- Carte CV -->
+            <div class="document-card">
+              <div class="document-file">
+                <div class="document-file-icon">📄</div>
+                <div class="document-file-type">PDF</div>
+              </div>
+              <div class="document-name">Curriculum Vitae</div>
+              {% if postulant.cv %}
+                <a href="{{ postulant.cv.url }}" target="_blank" class="document-action">Télécharger</a>
+              {% else %}
+                <span class="document-action" style="background: #e2e8f0; color: #64748b; cursor: not-allowed;">Indisponible</span>
+              {% endif %}
+            </div>
+
+            <!-- Carte Lettre de Motivation -->
+            <div class="document-card">
+              <div class="document-file">
+                <div class="document-file-icon">📝</div>
+                <div class="document-file-type">PDF</div>
+              </div>
+              <div class="document-name">Lettre de Motivation</div>
+              {% if postulant.lettre_motivation %}
+                <a href="{{ postulant.lettre_motivation.url }}" target="_blank" class="document-action">Télécharger</a>
+              {% else %}
+                <span class="document-action" style="background: #e2e8f0; color: #64748b; cursor: not-allowed;">Indisponible</span>
+              {% endif %}
+            </div>
+          </div>
+        </section>
+
+        <!-- ==== LOCALISATION ==== -->
+        <section class="profil-section">
+          <h3>📍 Localisation</h3>
+          <div class="localisation-grid">
+            <div class="localisation-item">
+              <div class="localisation-icon">🏛️</div>
+              <span class="localisation-label">Province</span>
+              <span class="localisation-value">{{ postulant.province }}</span>
+            </div>
+            <div class="localisation-item">
+              <div class="localisation-icon">🏘️</div>
+              <span class="localisation-label">Arrondissement</span>
+              <span class="localisation-value">{{ postulant.arrondissement }}</span>
+            </div>
+            <div class="localisation-item">
+              <div class="localisation-icon">🏠</div>
+              <span class="localisation-label">Quartier</span>
+              <span class="localisation-value">{{ postulant.quartier }}</span>
+            </div>
+            <div class="localisation-item">
+              <div class="localisation-icon">📞</div>
+              <span class="localisation-label">Téléphone</span>
+              <span class="localisation-value">{{ profil.telephone }}</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="{% static 'comptes/js/espace_postulant.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+/* 🌈 Styles de base */
+:root {
+  --primary-color: #3b3b67;
+  --secondary-color: #2c2c54;
+  --background: #f5f6fa;
+  --card-bg: #fff;
+  --text-dark: #2c2c54;
+  --text-light: #777;
+  --border-radius: 14px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-dark);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+/* 🧭 Conteneur principal */
+.favoris-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.favoris-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--primary-color);
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+/* 📋 Liste des favoris */
+.favoris-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+/* 💳 Carte individuelle */
+.favori-card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-top: 5px solid var(--primary-color);
+}
+
+.favori-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Nom du postulant */
+.favori-card h3 {
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Date ajout */
+.favori-card p {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+/* 🔘 Bouton Voir profil */
+.btn-detail {
+  display: inline-block;
+  padding: 10px 18px;
+  background: var(--primary-color);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  transition: background 0.3s ease;
+  align-self: flex-start;
+}
+
+.btn-detail:hover {
+  background: var(--secondary-color);
+}
+
+/* 💬 Message si aucun favori */
+.favoris-container p {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 1.1rem;
+  margin-top: 30px;
+}
+
+/* 📱 Responsive */
+@media (max-width: 600px) {
+  body {
+    padding: 20px;
+  }
+
+  .favoris-container h2 {
+    font-size: 1.6rem;
+  }
+
+  .favori-card {
+    padding: 16px;
+  }
+
+  .btn-detail {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+
+.btn-remove {
+  display: inline-block;
+  padding: 10px 18px;
+  background: #e74c3c;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  transition: background 0.3s ease;
+  margin-left: 8px;
+}
+
+.btn-remove:hover {
+  background: #c0392b;
+}

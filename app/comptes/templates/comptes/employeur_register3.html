@@ -1,0 +1,121 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'comptes/css/employeur_register3.css' %}">
+    <title>Création de compte - Étape 3</title>
+</head>
+<body>
+
+<main class="container">
+    <header class="register-header">
+        <div class="header-logo">
+            <!-- Exemple : <img src="{% static 'img/logo.png' %}" alt="Logo du site"> -->
+        </div>
+        <h1 class="header-title">Création de compte</h1>
+        <p class="header-subtitle">Étape 3 : Compléter mon profil employeur</p>
+    </header>
+
+    <form method="post" enctype="multipart/form-data" class="employeur-form">
+        {% csrf_token %}
+
+        <!-- FORMULAIRE EMPLOYEUR -->
+        <section class="section-employeur">
+
+            <div class="form-group">
+                {{ form_employeur.representant_entreprise.label_tag }}
+                {{ form_employeur.representant_entreprise }}
+                {% if form_employeur.representant_entreprise.errors %}
+                    <div class="error">{{ form_employeur.representant_entreprise.errors }}</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- FORMULAIRE SOCIETE (affiché seulement si representant_entreprise = "oui") -->
+        <section id="societe-form" class="section-societe" style="display: none;">
+         <header class="register-header">
+
+            <p class="header-subtitle">Étape 4 : Compléter les informations de la societe</p>
+        </header>
+
+            <div class="form-group">
+                {{ form_societe.nom_societe.label_tag }}
+                {{ form_societe.nom_societe }}
+                {% if form_societe.nom_societe.errors %}
+                    <div class="error">{{ form_societe.nom_societe.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form_societe.logo_societe.label_tag }}
+                {{ form_societe.logo_societe }}
+                {% if form_societe.logo_societe.errors %}
+                    <div class="error">{{ form_societe.logo_societe.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form_societe.secteur_activite.label_tag }}
+                {{ form_societe.secteur_activite }}
+                {% if form_societe.secteur_activite.errors %}
+                    <div class="error">{{ form_societe.secteur_activite.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form_societe.adresse_societe.label_tag }}
+                {{ form_societe.adresse_societe}}
+                {% if form_societe.adresse_societe.errors %}
+                    <div class="error">{{ form_societe.adresse_societe.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form_societe.site_web.label_tag }}
+                {{ form_societe.site_web }}
+                {% if form_societe.site_web.errors %}
+                    <div class="error">{{ form_societe.site_web.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form_societe.bio_societe.label_tag }}
+                {{ form_societe.bio_societe }}
+                {% if form_societe.bio_societe.errors %}
+                    <div class="error">{{ form_societe.bio_societe.errors }}</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- BOUTON DE VALIDATION -->
+        <div class="form-actions">
+            <button type="submit">Valider et terminer</button>
+        </div>
+    </form>
+</main>
+
+<!-- Script pour gérer l'affichage et required des champs société -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const radios = document.querySelectorAll('input[name="representant_entreprise"]');
+    const societeSection = document.getElementById("societe-form");
+
+    function toggleSocieteSection() {
+        const checked = document.querySelector('input[name="representant_entreprise"]:checked');
+        const isRepresentant = checked && checked.value === "oui";
+
+        societeSection.style.display = isRepresentant ? "block" : "none";
+    }
+
+    radios.forEach(radio => radio.addEventListener("change", toggleSocieteSection));
+    toggleSocieteSection(); // Initialisation
+});
+
+</script>
+
+
+</body>
+</html>

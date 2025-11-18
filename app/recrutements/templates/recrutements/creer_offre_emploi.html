@@ -1,0 +1,86 @@
+{% load static %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publier une offre d'emploi</title>
+  <link rel="stylesheet" href="{% static 'recrutements/css/creer_offre_emploi.css' %}">
+</head>
+<body>
+
+  <!-- Header avec bouton de retour -->
+  <header class="form-header">
+    <a href="{% url 'espace_employeur' %}" class="back-button">
+      <span class="back-icon">←</span>
+      Retour à l'espace employeur
+    </a>
+  </header>
+
+  <!-- Container principal du formulaire -->
+  <main class="form-main">
+    <div class="form-container">
+
+      <!-- En-tête du formulaire -->
+      <div class="form-header-section">
+        <h1 class="form-title">
+          <span class="title-icon"> 📋 </span>
+            Publier une offre d'emploi
+        </h1>
+        <p class="form-subtitle">
+          Remplissez les informations nécessaires pour rendre votre annonce attractive et trouver le candidat idéal.
+        </p>
+      </div>
+
+      <!-- Formulaire -->
+      <form method="POST" novalidate class="offer-form">
+        {% csrf_token %}
+
+        <!-- Groupes de champs du formulaire -->
+        <div class="form-fields">
+          {% for field in form %}
+            <div class="form-group {% if field.errors %}has-error{% endif %}">
+              <label for="{{ field.id_for_label }}" class="field-label">
+                {{ field.label }}
+                {% if field.field.required %}
+                  <span class="required-asterisk">*</span>
+                {% endif %}
+              </label>
+
+              <div class="field-container">
+                {% render_field field class="input-field" %}
+                {% if field.help_text %}
+                  <div class="help-text">{{ field.help_text }}</div>
+                {% endif %}
+              </div>
+
+              {% if field.errors %}
+                <div class="error-message">
+                  <span class="error-icon">⚠️</span>
+                  {{ field.errors|striptags }}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Bouton de soumission -->
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">
+            <span class="submit-icon">🚀 Publier l'offre d'emploi</span>
+          </button>
+
+          <div class="form-note">
+            <span class="note-icon">💡</span>
+            Votre offre sera visible par tous les postulants après validation.
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+</body>
+</html>

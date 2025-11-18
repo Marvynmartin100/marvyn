@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'comptes/css/espace_employeur.css' %}">
+  <title>Espace Employeur</title>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <button id="menu-toggle" class="menu-toggle" aria-label="Ouvrir le menu">☰</button>
+      <h2>Bienvenue, {{ user.first_name }} {{ user.last_name }}</h2>
+    </div>
+
+    <div class="header-right">
+      {% if profil.photo %}
+        <img src="{{ profil.photo.url }}" alt="Photo de {{ user.get_full_name }}" class="header-photo">
+      {% endif %}
+      <a href="{% url 'notification_employeur' %}" class="notification-icon">🔔</a>
+      <form action="{% url 'deconnexion' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="logout-button">Se déconnecter</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <nav>
+      <ul>
+        <li><a href="{% url 'complete_espace_employeur' %}">✏️ Compléter mon profil</a></li>
+        <li><a href="{% url 'creer_offre_emploi' %}">➕ Créer une offre d'emploi</a></li>
+        <li><a href="{% url 'liste_offres' %}">📋 Mes offres d'emploi</a></li>
+        <li><a href="{% url 'liste_postulant' %}">🔍 Explorer les postulants</a></li>
+        <li><a href="{% url 'liste_conversations_employeur' %}">💬 Messages</a></li>
+        <li><a href="{% url 'employeur_favoris' %}">⭐ Voir favoris</a></li>
+        <li><a href="{% url 'mes_recommandations_employeur' %}">📈 Mes recommandations</a></li>
+        <li><a href="{% url 'liste_candidatures_employeur' %}">📝 Mes candidatures</a></li>
+        <li><a href="{% url 'connexion' %}">❓ Aide & Ressources</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+
+    <!-- Fil d'Ariane -->
+    <nav class="breadcrumb">
+      <a href="{% url 'espace_employeur' %}">Accueil</a>
+      <span class="breadcrumb-separator">›</span>
+      <span>Profil public</span>
+    </nav>
+
+    <div class="profil-container">
+
+      <!-- ==== SECTION IDENTITÉ ÉTENDUE AVEC INFORMATIONS PERSONNELLES ==== -->
+      <section class="profil-identite">
+        <div class="profil-photo-container">
+          {% if user.profil.photo %}
+            <img src="{{ user.profil.photo.url }}" alt="Photo de {{ user.get_full_name }}" class="profil-photo">
+            <div class="profil-status"></div>
+          {% else %}
+            <img src="{% static 'comptes/img/default.png' %}" alt="Photo par défaut" class="profil-photo">
+            <div class="profil-status"></div>
+          {% endif %}
+        </div>
+
+        <div class="profil-infos">
+          <p class="profil-title">Employeur</p>
+          <h1 class="profil-name">{{ user.first_name }} {{ user.last_name }}</h1>
+
+          <div class="profil-badges">
+            <span class="badge">{{ profil.get_nationalite_display }}</span>
+            <span class="badge">{{ profil.get_sexe_display|default:"Non précisé" }}</span>
+            <span class="badge">Age : {{ profil.age }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==== CONTENU PRINCIPAL EN GRID ==== -->
+      <div class="profil-content">
+
+        <!-- ==== À PROPOS (PLEINE LARGEUR) ==== -->
+        <section class="profil-section full-width">
+          <div class="section-header">
+            <h3>👤 À Propos</h3>
+          </div>
+          <div class="bio-content">
+            <div class="bio-section">
+              <h4>Présentation</h4>
+              <p class="bio">{{ employeur.bio_employeur|default:"Aucune biographie renseignée pour le moment." }}</p>
+            </div>
+            <div class="coordonnees-grid">
+              <div class="coordonnee-item">
+                <div class="coordonnee-icon">📧</div>
+                <span class="coordonnee-label">Email</span>
+                <span class="coordonnee-value">{{ user.email }}</span>
+              </div>
+              <div class="coordonnee-item">
+                <div class="coordonnee-icon">📱</div>
+                <span class="coordonnee-label">Téléphone</span>
+                <span class="coordonnee-value">{{ profil.telephone|default:"Non renseigné" }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==== INFORMATIONS SUR LA SOCIÉTÉ ==== -->
+        {% if societe %}
+        <section class="profil-section full-width">
+          <div class="section-header">
+            <h3>🏢 Informations sur la société</h3>
+          </div>
+          <div class="societe-content">
+
+            <!-- En-tête société avec logo -->
+            <div class="societe-header">
+              {% if societe.logo_societe %}
+                <img src="{{ societe.logo_societe.url }}" alt="Logo de {{ societe.nom_societe }}" class="societe-logo">
+              {% endif %}
+              <div class="societe-titre">
+                <h4 class="societe-nom">{{ societe.nom_societe|default:"Nom non renseigné" }}</h4>
+                {% if societe.site_web %}
+                  <a href="{{ societe.site_web }}" target="_blank" class="societe-site">{{ societe.site_web }}</a>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Description société -->
+            <div class="societe-bio-section">
+              <h4>Présentation de l'entreprise</h4>
+              <p class="societe-bio">{{ societe.bio_societe|default:"Aucune description disponible pour le moment." }}</p>
+            </div>
+
+            <!-- Détails de la société en grille -->
+            <div class="societe-grid">
+              <div class="societe-item">
+                <div class="societe-icon">🏭</div>
+                <span class="societe-label">Secteur d'activité</span>
+                <span class="societe-value">{{ societe.secteur_activite|default:"Non renseigné" }}</span>
+              </div>
+              <div class="societe-item">
+                <div class="societe-icon">📍</div>
+                <span class="societe-label">Adresse</span>
+                <span class="societe-value">{{ societe.adresse_societe|default:"Adresse non renseignée" }}</span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+        {% endif %}
+
+      </div>
+    </div>
+  </main>
+
+  <script src="{% static 'comptes/js/espace_postulant.js' %}"></script>
+</body>
+</html>

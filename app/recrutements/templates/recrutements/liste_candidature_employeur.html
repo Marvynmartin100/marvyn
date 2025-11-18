@@ -1,0 +1,327 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'recrutements/css/liste_candidature_employeur.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Gestion des candidatures - Espace Employeur</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Header avec bouton de retour -->
+        <div class="header">
+            <div class="header-actions">
+                <a href="{% url 'espace_employeur' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à l'espace employeur
+                </a>
+            </div>
+            <h1>Gestion des candidatures</h1>
+            <p class="subtitle">Consultez et gérez toutes les candidatures reçues pour vos offres</p>
+        </div>
+
+        <!-- Messages Django -->
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Filtres et statistiques -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <h3 class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Filtrer les candidatures
+                </h3>
+                <div class="sort-options">
+                    <!-- Filtre par offre -->
+                    <form method="get" action="" class="filter-form">
+                        <select name="offre" id="offre" class="sort-select" onchange="this.form.submit()">
+                            <option value="">Toutes les offres</option>
+                            {% for offre in offres %}
+                                <option value="{{ offre.id }}" {% if offre_selectionnee == offre.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ offre.titre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+
+                    <!-- Filtre par statut -->
+                    <select id="statut-filter" class="sort-select">
+                        <option value="all">Tous les statuts</option>
+                        <option value="en attente">En attente</option>
+                        <option value="acceptee">Acceptées</option>
+                        <option value="refusee">Refusées</option>
+                    </select>
+
+                    <!-- Recherche -->
+                    <div class="search-box">
+                        <input type="text" id="search-candidatures" placeholder="Rechercher un postulant..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-number" id="total-candidatures">{{ candidatures|length }}</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="en-attente-count">0</span>
+                <span class="stat-label">En attente</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="acceptee-count">0</span>
+                <span class="stat-label">Acceptées</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="refusee-count">0</span>
+                <span class="stat-label">Refusées</span>
+            </div>
+        </div>
+
+        <!-- Liste des candidatures -->
+        {% if candidatures %}
+            <div class="candidatures-container">
+                <ul class="candidatures-list" id="candidatures-list">
+                    {% for candidature in candidatures %}
+                        <li class="candidature-item"
+                            data-statut="{{ candidature.statut|lower }}"
+                            data-offre="{{ candidature.offre.id }}"
+                            data-date="{{ candidature.date_candidature|date:'Y-m-d' }}"
+                            data-postulant="{{ candidature.postulant.profil.user.username|lower }}">
+
+                            <div class="candidature-header">
+                                <div class="candidature-main-info">
+                                    <!-- Photo de profil et informations personnelles -->
+                                    <div class="postulant-profile">
+                                        <div class="profile-image-container">
+                                            {% if candidature.postulant.profil.photo %}
+                                                <img src="{{ candidature.postulant.profil.photo.url }}" alt="Photo de {{ candidature.postulant.profil.user.get_full_name }}" class="profile-image">
+                                            {% else %}
+                                                <div class="profile-image-placeholder">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="profile-details">
+                                            <h2 class="postulant-name">
+                                                {{ candidature.postulant.profil.user.get_full_name|default:candidature.postulant.profil.user.username }}
+                                            </h2>
+                                            <div class="personal-info">
+                                                {% if candidature.postulant.profil.age %}
+                                                    <span class="info-item">
+                                                        <i class="fas fa-birthday-cake"></i>
+                                                        {{ candidature.postulant.profil.age }} ans
+                                                    </span>
+                                                {% endif %}
+
+                                                {% if candidature.postulant.profil.sexe %}
+                                                    <span class="info-item">
+                                                        <i class="fas fa-{% if candidature.postulant.profil.sexe == 'M' %}male{% else %}female{% endif %}"></i>
+                                                        {{ candidature.postulant.profil.get_sexe_display }}
+                                                    </span>
+                                                {% endif %}
+
+                                                {% if candidature.postulant.profil.nationalite %}
+                                                    <span class="info-item">
+                                                        <i class="fas fa-flag"></i>
+                                                        {{ candidature.postulant.profil.nationalite }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="candidature-meta-info">
+                                    <div class="candidature-meta">
+                                        <span class="meta-date">
+                                            <i class="far fa-calendar"></i>
+                                            Candidaté le {{ candidature.date_candidature|date:"d/m/Y" }}
+                                        </span>
+                                        <span class="meta-time">
+                                            <i class="far fa-clock"></i>
+                                            {{ candidature.date_candidature|date:"H:i" }}
+                                        </span>
+                                    </div>
+
+                                    <div class="candidature-indicators">
+                                        <span class="statut-badge statut-{{ candidature.statut|slugify }}">
+                                            <i class="statut-icon"></i>
+                                            {{ candidature.get_statut_display }}
+                                        </span>
+                                        <span class="offre-badge">
+                                            {{ candidature.offre.type_contrat }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="candidature-content">
+                                <div class="candidature-details">
+                                    <div class="detail-group">
+                                        <div class="detail-item">
+                                            <i class="fas fa-building"></i>
+                                            <strong>Offre :</strong>
+                                            <span>{{ candidature.offre.titre }}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-user"></i>
+                                            <strong>Postulant :</strong>
+                                            <span>{{ candidature.postulant.profil.user.username }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="detail-group">
+                                        <div class="detail-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <strong>Localisation :</strong>
+                                            <span>
+                                                {% if candidature.postulant.quartier %}
+                                                    {{ candidature.postulant.quartier }}
+                                                    {% if candidature.postulant.arrondissement %}, {{ candidature.postulant.arrondissement }}{% endif %}
+                                                {% else %}
+                                                    Non précisé
+                                                {% endif %}
+                                            </span>
+                                        </div>
+
+                                        <!-- Informations supplémentaires du profil -->
+                                        {% if candidature.postulant.profil.telephone %}
+                                        <div class="detail-item">
+                                            <i class="fas fa-phone"></i>
+                                            <strong>Téléphone :</strong>
+                                            <span>{{ candidature.postulant.profil.telephone }}</span>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if candidature.postulant.profil.email %}
+                                        <div class="detail-item">
+                                            <i class="fas fa-envelope"></i>
+                                            <strong>Email :</strong>
+                                            <span>{{ candidature.postulant.profil.email }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="candidature-actions">
+                                    {% if candidature.statut == 'en attente' %}
+                                        <div class="action-buttons">
+                                            <form method="post" class="action-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="candidature_id" value="{{ candidature.id }}">
+                                                <button type="submit" name="action" value="accepter" class="btn btn-success">
+                                                    <i class="fas fa-check"></i>
+                                                    Accepter
+                                                </button>
+                                            </form>
+                                            <form method="post" class="action-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="candidature_id" value="{{ candidature.id }}">
+                                                <button type="submit" name="action" value="refuser" class="btn btn-danger">
+                                                    <i class="fas fa-times"></i>
+                                                    Refuser
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% elif candidature.statut == 'acceptee' %}
+                                        <div class="action-buttons">
+                                            <span class="statut-confirmed">
+                                                <i class="fas fa-check-circle"></i>
+                                                Candidature acceptée
+                                            </span>
+                                            <a href="{% url 'creer_conversation' 'candidature' candidature.id %}" class="btn btn-primary">
+                                                <i class="fas fa-comments"></i>
+                                                Contacter
+                                            </a>
+                                        </div>
+                                    {% elif candidature.statut == 'refusee' %}
+                                        <div class="action-buttons">
+                                            <span class="statut-rejected">
+                                                <i class="fas fa-times-circle"></i>
+                                                Candidature refusée
+                                            </span>
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="secondary-actions">
+                                        <a href="{% url 'profil_public_postulant' candidature.postulant.profil.slug %}" class="btn btn-outline btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                            Voir le profil complet
+                                        </a>
+                                        <a href="{% url 'detail_offre_emploi' candidature.offre.slug %}" class="btn btn-outline btn-sm">
+                                            <i class="fas fa-briefcase"></i>
+                                            Voir l'offre
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Résumé du filtrage -->
+            <div class="filter-summary" id="filter-summary">
+                <div class="summary-content">
+                    <span id="visible-count">{{ candidatures|length }}</span> candidature(s) affichée(s)
+                    <button id="reset-filters" class="btn btn-outline btn-sm">
+                        <i class="fas fa-redo"></i>
+                        Réinitialiser les filtres
+                    </button>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- État vide -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Aucune candidature</h3>
+                <p>Vous n'avez reçu aucune candidature pour le moment.</p>
+                <div class="empty-actions">
+                    <a href="{% url 'liste_offres' %}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i>
+                        Voir mes offres
+                    </a>
+                    <a href="{% url 'creer_offre_emploi' %}" class="btn btn-secondary">
+                        <i class="fas fa-plus"></i>
+                        Créer une nouvelle offre
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Actions supplémentaires -->
+        <div class="footer-actions">
+            <div class="action-group">
+                <a href="{% url 'liste_offres' %}" class="btn btn-primary">
+                    <i class="fas fa-briefcase"></i>
+                    Gérer mes offres
+                </a>
+                <a href="{% url 'espace_employeur' %}" class="btn btn-secondary">
+                    <i class="fas fa-user-tie"></i>
+                    Mon espace employeur
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script JavaScript -->
+    <script src="{% static 'recrutements/js/liste_candidature_employeur.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+/* ------------------------------------------------------------- */
+/*  STYLES GÉNÉRAUX DU PROFIL PUBLIC DU POSTULANT                */
+/*  Thème : #3b3b67 (principal) | #2c2c54 (secondaire)           */
+/* ------------------------------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+:root {
+  --primary-color: #3b3b67;
+  --secondary-color: #2c2c54;
+  --light-bg: #f5f6fa;
+  --text-color: #2e2e3a;
+  --muted-text: #666;
+  --card-bg: #fff;
+  --border-radius: 12px;
+  --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Réinitialisation */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: var(--light-bg);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* Contenu principal */
+.main-content {
+  padding: 40px 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Fil d’Ariane */
+.breadcrumb {
+  font-size: 0.95rem;
+  margin-bottom: 30px;
+}
+
+.breadcrumb a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Container principal du profil */
+.profil-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Carte principale */
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 20px 25px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Profil - Identité */
+.profil-header {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.profil-photo {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--secondary-color);
+  box-shadow: var(--shadow);
+}
+
+.profil-infos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+
+.info-label {
+  color: var(--secondary-color);
+  font-weight: 600;
+}
+
+.info-value {
+  color: var(--text-color);
+}
+
+/* Section : À propos */
+.apropos header h3 {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.bio {
+  margin-bottom: 15px;
+  color: var(--muted-text);
+  font-style: italic;
+}
+
+.competences h4 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: var(--secondary-color);
+}
+
+.competences ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.competences li {
+  background: #f2f3fa;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.competences .niveau {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Section : Documents */
+.documents header h3 {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.doc-link {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.doc-link:hover {
+  text-decoration: underline;
+}
+
+/* Section : Localisation */
+.localisation header h3 {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+/* Espacement interne pour les sections */
+.section-content {
+  margin-top: 10px;
+}
+
+/* ------------------------------------------ */
+/*          BOUTONS ACTIONS EMPLOYEUR         */
+/* ------------------------------------------ */
+
+.btn-favori,
+.btn-recommander {
+  background-color: var(--primary-color);
+  color: #fff;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s;
+  box-shadow: var(--shadow);
+  margin-right: 10px;
+}
+
+.btn-favori:hover,
+.btn-recommander:hover {
+  background-color: var(--secondary-color);
+}
+
+/* ------------------------------------------ */
+/*          MODAL DE RECOMMANDATION           */
+/* ------------------------------------------ */
+
+.recommandation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.recommandation-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.recommandation-contenu {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  width: 90%;
+  max-width: 400px;
+  padding: 25px;
+  text-align: center;
+  animation: fadeIn 0.4s ease;
+}
+
+.recommandation-contenu h3 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.recommandation-contenu select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+/* Boutons du modal */
+.recommandation-contenu .btn-envoyer,
+.recommandation-contenu .btn-fermer {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0 5px;
+}
+
+.recommandation-contenu .btn-envoyer {
+  background-color: var(--primary-color);
+  color: #fff;
+  transition: background 0.3s;
+}
+
+.recommandation-contenu .btn-envoyer:hover {
+  background-color: var(--secondary-color);
+}
+
+.recommandation-contenu .btn-fermer {
+  background-color: #ddd;
+  color: var(--text-color);
+}
+
+.recommandation-contenu .btn-fermer:hover {
+  background-color: #ccc;
+}
+
+/* ------------------------------------------ */
+/* Responsive Design */
+/* ------------------------------------------ */
+@media (max-width: 768px) {
+  .profil-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .info-label {
+    margin-bottom: 4px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .recommandation-contenu {
+    width: 95%;
+    padding: 20px;
+  }
+}
+
+/* Animation légère à l’apparition */
+.profil-section {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

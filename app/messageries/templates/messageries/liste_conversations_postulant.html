@@ -1,0 +1,377 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gérez vos conversations et messages avec les recruteurs">
+    <link rel="stylesheet" href="{% static 'messageries/css/liste_message.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Mes Conversations - Postulant</title>
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <div class="header-actions">
+                <a href="{% url 'espace_postulant' %}" class="back-button" aria-label="Retour à l'espace postulant">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à l'espace postulant
+                </a>
+            </div>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>Mes Conversations</h1>
+                    <p class="header-subtitle">Gérez vos échanges avec les employeurs</p>
+                </div>
+                {% if conversations %}
+                <div class="conversation-stats">
+                    <span class="stat" id="total-conversations">
+                        <i class="fas fa-comments"></i>
+                        {{ conversations|length }} conversation{{ conversations|length|pluralize }}
+                    </span>
+                    <span class="stat" id="unread-conversations">
+                        <i class="fas fa-envelope"></i>
+                        <span id="unread-count">0</span> non lu{{ unread_count|pluralize }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <main class="conversations-container">
+            {% if conversations %}
+                <div class="conversations-controls">
+                    <div class="search-box">
+                        <input type="text"
+                               placeholder="Rechercher une conversation..."
+                               class="search-input"
+                               id="searchConversations">
+                        <button type="button" class="search-btn" aria-label="Rechercher">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="sort-options">
+                        <select class="sort-select" aria-label="Trier les conversations" id="sortConversations">
+                            <option value="recent">Plus récentes</option>
+                            <option value="ancien">Plus anciennes</option>
+                            <option value="unread">Non lues</option>
+                            <option value="read">Déjà lues</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Statistiques en temps réel -->
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="active-conversations">{{ conversations|length }}</span>
+                            <span class="stat-label">Conversations actives</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon unread">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="total-unread">0</span>
+                            <span class="stat-label">Messages non lus</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon recent">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="today-conversations">0</span>
+                            <span class="stat-label">Aujourd'hui</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="conversations-list" id="conversationsList">
+                    {% for conv in conversations %}
+                        {% if conv.utilisateur1 == request.user %}
+                            {% with autre=conv.utilisateur2 %}
+                            <article class="conversation-card {% if conv.unread_count %}unread{% endif %}"
+                                     data-conversation-id="{{ conv.id }}"
+                                     data-last-activity="{{ conv.updated_at|date:'c' }}"
+                                     data-user="{{ autre.username|lower }}"
+                                     data-unread="{{ conv.unread_count|default:0 }}"
+                                     data-online="false">
+                                <a href="{% url 'conversation_detail' conv.id %}" class="conversation-link">
+                                    <div class="conversation-avatar">
+                                        <div class="avatar-placeholder">
+                                            {{ autre.username|first|upper }}
+                                            {% if conv.unread_count %}
+                                            <div class="online-indicator"></div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="conversation-content">
+                                        <div class="conversation-header">
+                                            <div class="user-info">
+                                                <h2 class="username">{{ autre.username }}</h2>
+                                                <span class="user-role">Employeur</span>
+                                            </div>
+                                            <div class="conversation-meta">
+                                                <time class="timestamp" datetime="{{ conv.updated_at|date:'c' }}">
+                                                    {% if conv.updated_at|date:"Ymd" == now|date:"Ymd" %}
+                                                        Aujourd'hui à {{ conv.updated_at|date:"H:i" }}
+                                                    {% else %}
+                                                        {{ conv.updated_at|date:"d/m/Y à H:i" }}
+                                                    {% endif %}
+                                                </time>
+                                                {% if conv.unread_count %}
+                                                <span class="unread-badge" aria-label="{{ conv.unread_count }} message{{ conv.unread_count|pluralize }} non lu{{ conv.unread_count|pluralize }}">
+                                                    <i class="fas fa-envelope"></i>
+                                                    {{ conv.unread_count }}
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="conversation-preview">
+                                            {% with dernier=conv.messages.last %}
+                                                {% if dernier %}
+                                                    <div class="message-preview">
+                                                        <span class="sender {% if dernier.expediteur == request.user %}self{% else %}other{% endif %}">
+                                                            {% if dernier.expediteur == request.user %}
+                                                                Vous :
+                                                            {% else %}
+                                                                {{ dernier.expediteur.username }} :
+                                                            {% endif %}
+                                                        </span>
+                                                        <span class="message-content">
+                                                            {{ dernier.contenu|truncatechars:100 }}
+                                                        </span>
+                                                    </div>
+
+                                                {% else %}
+                                                    <div class="no-messages">
+                                                        <i class="fas fa-comment-slash"></i>
+                                                        <em>Aucun message échangé</em>
+                                                    </div>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+
+                                        <div class="conversation-footer">
+                                            <div class="conversation-tags">
+                                                {% if conv.offre_associee %}
+                                                <span class="conversation-tag">
+                                                    <i class="fas fa-briefcase"></i>
+                                                    {{ conv.offre_associee.titre|truncatechars:20 }}
+                                                </span>
+                                                {% endif %}
+                                                <span class="conversation-tag status">
+                                                    <i class="fas fa-circle"></i>
+                                                    {% if conv.updated_at|timesince == "0 minutes" %}
+                                                        En ligne
+                                                    {% else %}
+                                                        Dernière activité : {{ conv.updated_at|timesince }}
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="conversation-actions">
+                                        <button class="action-btn favorite-btn"
+                                                data-conv-id="{{ conv.id }}"
+                                                aria-label="Marquer comme favori">
+                                            <i class="far fa-star"></i>
+                                        </button>
+                                        <div class="conversation-arrow">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                            {% endwith %}
+                        {% else %}
+                            {% with autre=conv.utilisateur1 %}
+                            <article class="conversation-card {% if conv.unread_count %}unread{% endif %}"
+                                     data-conversation-id="{{ conv.id }}"
+                                     data-last-activity="{{ conv.updated_at|date:'c' }}"
+                                     data-user="{{ autre.username|lower }}"
+                                     data-unread="{{ conv.unread_count|default:0 }}"
+                                     data-online="false">
+                                <a href="{% url 'conversation_detail' conv.id %}" class="conversation-link">
+                                    <div class="conversation-avatar">
+                                        <div class="avatar-placeholder">
+                                            {{ autre.username|first|upper }}
+                                            {% if conv.unread_count %}
+                                            <div class="online-indicator"></div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="conversation-content">
+                                        <div class="conversation-header">
+                                            <div class="user-info">
+                                                <h2 class="username">{{ autre.username }}</h2>
+                                                <span class="user-role">Employeur</span>
+                                            </div>
+                                            <div class="conversation-meta">
+                                                <time class="timestamp" datetime="{{ conv.updated_at|date:'c' }}">
+                                                    {% if conv.updated_at|date:"Ymd" == now|date:"Ymd" %}
+                                                        Aujourd'hui à {{ conv.updated_at|date:"H:i" }}
+                                                    {% else %}
+                                                        {{ conv.updated_at|date:"d/m/Y à H:i" }}
+                                                    {% endif %}
+                                                </time>
+                                                {% if conv.unread_count %}
+                                                <span class="unread-badge" aria-label="{{ conv.unread_count }} message{{ conv.unread_count|pluralize }} non lu{{ conv.unread_count|pluralize }}">
+                                                    <i class="fas fa-envelope"></i>
+                                                    {{ conv.unread_count }}
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="conversation-preview">
+                                            {% with dernier=conv.messages.last %}
+                                                {% if dernier %}
+                                                    <div class="message-preview">
+                                                        <span class="sender {% if dernier.expediteur == request.user %}self{% else %}other{% endif %}">
+                                                            {% if dernier.expediteur == request.user %}
+                                                                Vous :
+                                                            {% else %}
+                                                                {{ dernier.expediteur.username }} :
+                                                            {% endif %}
+                                                        </span>
+                                                        <span class="message-content">
+                                                            {{ dernier.contenu|truncatechars:100 }}
+                                                        </span>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="no-messages">
+                                                        <i class="fas fa-comment-slash"></i>
+                                                        <em>Aucun message échangé</em>
+                                                    </div>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+
+                                        <div class="conversation-footer">
+                                            <div class="conversation-tags">
+                                                {% if conv.offre_associee %}
+                                                <span class="conversation-tag">
+                                                    <i class="fas fa-briefcase"></i>
+                                                    {{ conv.offre_associee.titre|truncatechars:20 }}
+                                                </span>
+                                                {% endif %}
+                                                <span class="conversation-tag status">
+                                                    <i class="fas fa-circle"></i>
+                                                    {% if conv.updated_at|timesince == "0 minutes" %}
+                                                        En ligne
+                                                    {% else %}
+                                                        Dernière activité : {{ conv.updated_at|timesince }}
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="conversation-actions">
+                                        <button class="action-btn favorite-btn"
+                                                data-conv-id="{{ conv.id }}"
+                                                aria-label="Marquer comme favori">
+                                            <i class="far fa-star"></i>
+                                        </button>
+                                        <div class="conversation-arrow">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                            {% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Résumé du filtrage -->
+                <div class="filter-summary" id="filterSummary" style="display: none;">
+                    <div class="summary-content">
+                        <span id="visibleCount">0</span> conversation(s) affichée(s)
+                        <button id="resetFilters" class="cta-button secondary btn-sm">
+                            <i class="fas fa-redo"></i>
+                            Réinitialiser
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pagination améliorée -->
+                {% if is_paginated %}
+                <nav class="pagination" aria-label="Pagination des conversations">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">
+                        <i class="fas fa-chevron-left"></i>
+                        Précédent
+                    </a>
+                    {% endif %}
+
+                    <div class="pagination-pages">
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <span class="pagination-current">{{ num }}</span>
+                            {% else %}
+                            <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">
+                        Suivant
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h2 class="empty-title">Aucune conversation</h2>
+                    <p class="empty-message">
+                        Vous n'avez pas encore de conversation avec des recruteurs.<br>
+                        Postulez à des offres pour démarrer des échanges.
+                    </p>
+                    <div class="empty-actions">
+                        <a href="{% url 'recherche_emploi' %}" class="cta-button primary">
+                            <i class="fas fa-search"></i>
+                            Chercher des emplois
+                        </a>
+                        <a href="{% url 'profil_postulant' %}" class="cta-button secondary">
+                            <i class="fas fa-user-edit"></i>
+                            Compléter mon profil
+                        </a>
+                        <a href="{% url 'mes_candidatures' %}" class="cta-button secondary">
+                            <i class="fas fa-file-alt"></i>
+                            Voir mes candidatures
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <!-- Loading state amélioré -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Chargement des conversations...</p>
+    </div>
+
+    <!-- Notification toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="{% static 'messageries/js/liste_conversations.js' %}"></script>
+</body>
+</html>

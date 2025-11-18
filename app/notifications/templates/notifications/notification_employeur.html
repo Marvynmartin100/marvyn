@@ -1,0 +1,371 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace Employeur — Gestion des Notifications</title>
+  <link rel="stylesheet" href="{% static 'notifications/css/notification_employeur.css' %}">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="page-wrapper">
+
+    <!-- Header Principal avec Navigation -->
+    <header class="main-header">
+      <div class="header-container">
+        <div class="header-back">
+          <a href="{% url 'espace_employeur' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Retour à l'espace employeur
+          </a>
+        </div>
+
+        <div class="header-title">
+          <h1><i class="fas fa-bell"></i> Mes Notifications</h1>
+          <p class="page-subtitle">Gérez et consultez toutes vos alertes et messages importants</p>
+        </div>
+
+        <div class="header-stats">
+          <div class="stat-card">
+            <div class="stat-number">{{ notifications|length }}</div>
+            <div class="stat-label">Total</div>
+          </div>
+          <div class="stat-card unread">
+            <div class="stat-number">{{ unread_count|default:0 }}</div>
+            <div class="stat-label">Non lues</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-container">
+
+      <!-- Section des Actions Globales -->
+      <section class="actions-section">
+        <div class="actions-header">
+          <h2><i class="fas fa-cog"></i> Actions rapides</h2>
+        </div>
+
+        <div class="actions-grid">
+          <form method="post" action="{% url 'notification_employeur' %}" class="action-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="mark_all_read">
+            <button type="submit" class="action-btn success">
+              <i class="fas fa-check-double"></i>
+              <span class="btn-text">Tout marquer comme lu</span>
+            </button>
+          </form>
+
+          {% if notifications %}
+          <form method="post" action="{% url 'notification_employeur' %}" class="action-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_all">
+            <button type="submit" class="action-btn danger">
+              <i class="fas fa-trash-alt"></i>
+              <span class="btn-text">Supprimer tout</span>
+            </button>
+          </form>
+          {% endif %}
+
+          <a href="{% url 'espace_employeur' %}" class="action-btn primary">
+            <i class="fas fa-home"></i>
+            <span class="btn-text">Espace employeur</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Section des Filtres -->
+      <section class="filters-section">
+        <div class="filters-header">
+          <h3><i class="fas fa-filter"></i> Filtres et tri</h3>
+        </div>
+
+        <div class="filters-content">
+          <form method="get" action="{% url 'notification_employeur' %}" class="filter-form">
+            <div class="form-group">
+              <label for="filter-status" class="form-label">
+                <i class="fas fa-eye"></i> Statut
+              </label>
+              <select name="status" id="filter-status" class="form-select" onchange="this.form.submit()">
+                <option value="">Toutes les notifications</option>
+                <option value="non lu" {% if request.GET.status == 'non lu' %}selected{% endif %}>Non lues seulement</option>
+                <option value="lu" {% if request.GET.status == 'lu' %}selected{% endif %}>Lues seulement</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="filter-type" class="form-label">
+                <i class="fas fa-tag"></i> Type
+              </label>
+              <select name="type" id="filter-type" class="form-select" onchange="this.form.submit()">
+                <option value="">Tous les types</option>
+                <option value="candidature" {% if request.GET.type == 'candidature' %}selected{% endif %}>Candidatures</option>
+                <option value="message" {% if request.GET.type == 'message' %}selected{% endif %}>Messages</option>
+                <option value="alerte" {% if request.GET.type == 'alerte' %}selected{% endif %}>Alertes</option>
+                <option value="systeme" {% if request.GET.type == 'systeme' %}selected{% endif %}>Système</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="filter-date" class="form-label">
+                <i class="fas fa-calendar"></i> Période
+              </label>
+              <select name="date" id="filter-date" class="form-select" onchange="this.form.submit()">
+                <option value="">Toute période</option>
+                <option value="today" {% if request.GET.date == 'today' %}selected{% endif %}>Aujourd'hui</option>
+                <option value="week" {% if request.GET.date == 'week' %}selected{% endif %}>Cette semaine</option>
+                <option value="month" {% if request.GET.date == 'month' %}selected{% endif %}>Ce mois</option>
+              </select>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Section Principale des Notifications -->
+      <section class="notifications-section">
+        <div class="section-header">
+          <h2><i class="fas fa-list"></i> Liste des notifications</h2>
+          <div class="section-badge">
+            {% if request.GET.status or request.GET.type or request.GET.date %}
+              <span class="filter-indicator">Filtres actifs</span>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if notifications %}
+          <div class="notifications-container">
+            {% for notif in notifications %}
+              <article class="notification-card {% if notif.statut == 'non lu' %}unread{% endif %} {% if notif.important %}important{% endif %}"
+                       data-notification-id="{{ notif.id }}">
+
+                <!-- En-tête de la notification -->
+                <header class="notification-header">
+                  <div class="notification-badge">
+                    {% if notif.statut == 'non lu' %}
+                      <span class="unread-indicator" title="Non lue">
+                        <i class="fas fa-circle"></i>
+                      </span>
+                    {% endif %}
+
+                    {% if notif.important %}
+                      <span class="important-indicator" title="Important">
+                        <i class="fas fa-exclamation-triangle"></i>
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <div class="notification-title">
+                    <h3 class="title-text">
+                      {% if notif.titre %}
+                        {{ notif.titre }}
+                      {% else %}
+                        {{ notif.type|capfirst }}
+                      {% endif %}
+                    </h3>
+                    <div class="notification-meta">
+                      <span class="notification-type {{ notif.type }}">
+                        <i class="fas
+                          {% if notif.type == 'candidature' %}fa-user-plus
+                          {% elif notif.type == 'message' %}fa-envelope
+                          {% elif notif.type == 'alerte' %}fa-bell
+                          {% else %}fa-info-circle{% endif %}">
+                        </i>
+                        {{ notif.type|capfirst }}
+                      </span>
+                      <span class="notification-time">
+                        <i class="far fa-clock"></i>
+                        <time datetime="{{ notif.date_notif|date:'c' }}">
+                          {{ notif.date_notif|date:'d/m/Y à H:i' }}
+                        </time>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="notification-actions">
+                    {% if notif.statut == 'non lu' %}
+                    <form method="post" action="{% url 'notification_employeur' %}" class="quick-action-form">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="mark_read">
+                      <input type="hidden" name="notification_id" value="{{ notif.id }}">
+                      <button type="submit" class="action-icon mark-read" title="Marquer comme lu">
+                        <i class="far fa-check-circle"></i>
+                      </button>
+                    </form>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'notification_employeur' %}" class="quick-action-form">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="delete">
+                      <input type="hidden" name="notification_id" value="{{ notif.id }}">
+                      <button type="submit" class="action-icon delete" title="Supprimer">
+                        <i class="far fa-trash-alt"></i>
+                      </button>
+                    </form>
+                  </div>
+                </header>
+
+                <!-- Corps de la notification -->
+                <div class="notification-body">
+                  <p class="notification-content">{{ notif.contenu }}</p>
+
+                  {% if notif.cible or notif.action_possible and notif.action_possible != 'aucune' %}
+                  <div class="notification-actions-full">
+                    {% if notif.cible %}
+                      {% if notif.cible.get_absolute_url %}
+                        <a href="{{ notif.cible.get_absolute_url }}" class="btn btn-primary">
+                          <i class="fas fa-external-link-alt"></i>
+                          Voir les détails
+                        </a>
+                      {% else %}
+                        <a href="{% url 'notification_employeur' %}" class="btn btn-secondary">
+                          <i class="fas fa-search"></i>
+                          Explorer
+                        </a>
+                      {% endif %}
+                    {% endif %}
+
+                    {% if notif.action_possible and notif.action_possible != 'aucune' %}
+                      <div class="action-possible">
+                        <span class="action-label">{{ notif.action_possible }}</span>
+                        {% if notif.action_url %}
+                          <a href="{{ notif.action_url }}" class="btn btn-success">
+                            <i class="fas fa-play"></i>
+                            Exécuter
+                          </a>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  {% endif %}
+                </div>
+
+                <!-- Pied de la notification -->
+                <footer class="notification-footer">
+                  <div class="notification-source">
+                    <small>
+                      <i class="fas fa-user"></i>
+                      Émis par :
+                      {% if notif.emetteur %}
+                        {{ notif.emetteur.get_full_name|default:notif.emetteur.username }}
+                      {% else %}
+                        <em>Système</em>
+                      {% endif %}
+                    </small>
+                  </div>
+                </footer>
+              </article>
+            {% endfor %}
+          </div>
+
+          <!-- Pagination -->
+          {% if is_paginated %}
+          <nav class="pagination-section">
+            <div class="pagination-info">
+              <p>
+                Affichage des notifications {{ page_obj.start_index }} à {{ page_obj.end_index }}
+                sur un total de {{ paginator.count }}
+              </p>
+            </div>
+
+            <div class="pagination-controls">
+              {% if page_obj.has_previous %}
+                <a href="?page=1{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+                   class="pagination-btn first">
+                  <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+                   class="pagination-btn prev">
+                  <i class="fas fa-angle-left"></i>
+                </a>
+              {% endif %}
+
+              <span class="pagination-current">
+                Page {{ page_obj.number }} sur {{ paginator.num_pages }}
+              </span>
+
+              {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+                   class="pagination-btn next">
+                  <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?page={{ paginator.num_pages }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+                   class="pagination-btn last">
+                  <i class="fas fa-angle-double-right"></i>
+                </a>
+              {% endif %}
+            </div>
+          </nav>
+          {% endif %}
+
+        {% else %}
+          <!-- État vide -->
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="far fa-bell-slash"></i>
+            </div>
+            <h3>Aucune notification</h3>
+            <p>
+              {% if request.GET.status or request.GET.type or request.GET.date %}
+                Aucune notification ne correspond à vos critères de filtrage.
+              {% else %}
+                Vous n'avez aucune notification pour le moment.
+              {% endif %}
+            </p>
+
+            {% if request.GET.status or request.GET.type or request.GET.date %}
+              <a href="{% url 'notification_employeur' %}" class="btn btn-primary">
+                <i class="fas fa-times"></i>
+                Réinitialiser les filtres
+              </a>
+            {% endif %}
+
+            <a href="{% url 'espace_employeur' %}" class="btn btn-secondary">
+              <i class="fas fa-home"></i>
+              Retour à l'espace employeur
+            </a>
+          </div>
+        {% endif %}
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Confirmation pour les suppressions
+      const deleteForms = document.querySelectorAll('form[action*="delete"]');
+      deleteForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+          if (!confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
+            e.preventDefault();
+          }
+        });
+      });
+
+      // Confirmation pour la suppression globale
+      const deleteAllForm = document.querySelector('form[action*="delete_all"]');
+      if (deleteAllForm) {
+        deleteAllForm.addEventListener('submit', function(e) {
+          if (!confirm('Êtes-vous sûr de vouloir supprimer TOUTES vos notifications ? Cette action est irréversible.')) {
+            e.preventDefault();
+          }
+        });
+      }
+
+      // Animation de marquage comme lu
+      const markReadForms = document.querySelectorAll('.mark-read-form');
+      markReadForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+          const card = this.closest('.notification-card');
+          card.classList.remove('unread');
+          card.querySelector('.unread-indicator')?.remove();
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

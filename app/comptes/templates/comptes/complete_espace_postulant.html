@@ -1,0 +1,478 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{% static 'comptes/css/complete_espace_postulant.css' %}">
+  <title>Compléter mon profil</title>
+</head>
+<body>
+
+  <header>
+    <h2>🧾 Compléter mon profil</h2>
+    <p>Modifiez uniquement les sections que vous souhaitez mettre à jour.</p>
+
+    <!-- Bouton de retour -->
+    <div class="header-actions">
+      <a href="{% url 'espace_postulant' %}" class="back-button">
+        ← Retour à mon espace
+      </a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ==================== PHOTO ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">
+        <span>📸 Photo de profil</span>
+      </button>
+      <div class="accordion-content">
+
+        <!-- Conteneur AJAX -->
+        <div class="ajax-messages" id="messages-photo">
+          {% if messages %}
+            <div class="message-box">
+              {% for message in messages %}
+                {% if 'photo' in message.tags %}
+                  <p class="{{ message.tags }}">{{ message }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="ajax-form" data-section="photo">
+          {% csrf_token %}
+          <div class="form-group">
+            <div class="form-row">
+              <label for="{{ photo_form.photo.id_for_label }}">Photo :</label>
+              <div class="form-field">
+                {{ photo_form.photo }}
+                {% if photo_form.photo.errors %}
+                  <ul class="errorlist">
+                    {% for error in photo_form.photo.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          {% if profil.photo %}
+            <div class="form-group">
+              <img src="{{ profil.photo.url }}" alt="Photo actuelle de {{ user.get_full_name }}">
+            </div>
+          {% endif %}
+
+          <button type="submit" name="update_photo" class="submit-btn">Enregistrer la photo</button>
+        </form>
+
+        <details class="conseil">
+          <summary>Conseil</summary>
+          <p>Choisissez une photo claire, professionnelle et bien cadrée sur fond neutre.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== INTRODUCTION ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">
+        <span>🧾 Introduction</span>
+      </button>
+      <div class="accordion-content">
+
+        <div class="ajax-messages" id="messages-intro">
+          {% if messages %}
+            <div class="message-box">
+              {% for message in messages %}
+                {% if 'intro' in message.tags %}
+                  <p class="{{ message.tags }}">{{ message }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" class="ajax-form" data-section="intro">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="{{ intro_form.intro_postulant.id_for_label }}">Votre introduction :</label>
+            {{ intro_form.intro_postulant }}
+            {% if intro_form.intro_postulant.errors %}
+              <ul class="errorlist">
+                {% for error in intro_form.intro_postulant.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+          <button type="submit" name="update_introduction" class="submit-btn">Enregistrer l'introduction</button>
+        </form>
+
+        <details class="conseil">
+          <summary>Conseil</summary>
+          <p>Présentez brièvement votre parcours, vos compétences clés et vos objectifs professionnels.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== BIOGRAPHIE ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">
+        <span>📝 Biographie</span>
+      </button>
+      <div class="accordion-content">
+
+        <div class="ajax-messages" id="messages-bio">
+          {% if messages %}
+            <div class="message-box">
+              {% for message in messages %}
+                {% if 'bio' in message.tags %}
+                  <p class="{{ message.tags }}">{{ message }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" class="ajax-form" data-section="bio">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="{{ bio_form.bio_postulant.id_for_label }}">Votre biographie :</label>
+            {{ bio_form.bio_postulant }}
+            {% if bio_form.bio_postulant.errors %}
+              <ul class="errorlist">
+                {% for error in bio_form.bio_postulant.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+          <button type="submit" name="update_biographie" class="submit-btn">Enregistrer la biographie</button>
+        </form>
+
+        <details class="conseil">
+          <summary>Conseil</summary>
+          <p>Développez votre parcours professionnel, vos expériences et vos réalisations significatives.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== COMPÉTENCES ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">
+        <span>💡 Compétences</span>
+      </button>
+      <div class="accordion-content">
+
+        <div class="ajax-messages" id="messages-competences">
+          {% if messages %}
+            <div class="message-box">
+              {% for message in messages %}
+                {% if 'competences' in message.tags %}
+                  <p class="{{ message.tags }}">{{ message }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" class="ajax-form" data-section="competences">
+          {% csrf_token %}
+          {{ competence_formset.management_form }}
+          <div class="form-group">
+            <p class="section-description">Sélectionnez vos compétences et leur niveau :</p>
+            {% for form in competence_formset %}
+              <div class="competence-item">
+                <div class="form-row">
+                  <label for="{{ form.libelle.id_for_label }}">Compétence :</label>
+                  <div class="form-field">
+                    {{ form.libelle }}
+                    {% if form.libelle.errors %}
+                      <ul class="errorlist">
+                        {% for error in form.libelle.errors %}
+                          <li>{{ error }}</li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <label for="{{ form.niveau.id_for_label }}">Niveau :</label>
+                  <div class="form-field">
+                    {{ form.niveau }}
+                    {% if form.niveau.errors %}
+                      <ul class="errorlist">
+                        {% for error in form.niveau.errors %}
+                          <li>{{ error }}</li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% if form.instance.pk %}
+                  <div class="form-row delete-checkbox">
+                    <label></label>
+                    <div class="form-field">
+                      {{ form.DELETE }}
+                      <label for="{{ form.DELETE.id_for_label }}">Supprimer cette compétence</label>
+                    </div>
+                  </div>
+                {% endif %}
+                {{ form.id }}
+              </div>
+              {% if not forloop.last %}<hr>{% endif %}
+            {% endfor %}
+          </div>
+          <button type="submit" name="update_competences" class="submit-btn">Enregistrer les compétences</button>
+        </form>
+
+        <details class="conseil">
+          <summary>Conseil</summary>
+          <p>Choisissez les compétences les plus pertinentes pour votre domaine et indiquez votre niveau réel.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== CV ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">
+        <span>📄 CV</span>
+      </button>
+      <div class="accordion-content">
+
+        <div class="ajax-messages" id="messages-cv">
+          {% if messages %}
+            <div class="message-box">
+              {% for message in messages %}
+                {% if 'cv' in message.tags %}
+                  <p class="{{ message.tags }}">{{ message }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="ajax-form" data-section="cv">
+          {% csrf_token %}
+          {% if user.profil.cv %}
+            <div class="form-group">
+              <a href="{{ user.profil.cv.url }}" target="_blank" class="document-link">📎 Voir le CV actuel</a>
+            </div>
+          {% endif %}
+
+          <div class="form-group">
+            <div class="form-row">
+              <label for="{{ cv_form.cv.id_for_label }}">CV :</label>
+              <div class="form-field">
+                {{ cv_form.cv }}
+                {% if cv_form.cv.errors %}
+                  <ul class="errorlist">
+                    {% for error in cv_form.cv.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" name="update_cv" class="submit-btn">Mettre à jour le CV</button>
+        </form>
+
+        <details class="conseil">
+          <summary>Conseil</summary>
+          <p>Assurez-vous que votre CV est à jour, clair et sans fautes d'orthographe.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== LETTRE DE MOTIVATION ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">
+        <span>✉️ Lettre de motivation</span>
+      </button>
+      <div class="accordion-content">
+
+        <div class="ajax-messages" id="messages-lettre">
+          {% if messages %}
+            <div class="message-box">
+              {% for message in messages %}
+                {% if 'lettre' in message.tags %}
+                  <p class="{{ message.tags }}">{{ message }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="ajax-form" data-section="lettre">
+          {% csrf_token %}
+          {% if user.profil.lettre_motivation %}
+            <div class="form-group">
+              <a href="{{ user.profil.lettre_motivation.url }}" target="_blank" class="document-link">📎 Voir la lettre actuelle</a>
+            </div>
+          {% endif %}
+
+          <div class="form-group">
+            <div class="form-row">
+              <label for="{{ lettre_form.lettre_motivation.id_for_label }}">Lettre :</label>
+              <div class="form-field">
+                {{ lettre_form.lettre_motivation }}
+                {% if lettre_form.lettre_motivation.errors %}
+                  <ul class="errorlist">
+                    {% for error in lettre_form.lettre_motivation.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" name="update_lettre" class="submit-btn">Mettre à jour la lettre</button>
+        </form>
+
+        <details class="conseil">
+          <summary>Conseil</summary>
+          <p>Rédigez une lettre personnalisée, adaptée à l'offre visée et centrée sur vos motivations.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== LOCALISATION ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">
+        <span>📍 Localisation</span>
+      </button>
+      <div class="accordion-content">
+
+        <div class="ajax-messages" id="messages-localisation">
+          {% if messages %}
+            <div class="message-box">
+              {% for message in messages %}
+                {% if 'localisation' in message.tags %}
+                  <p class="{{ message.tags }}">{{ message }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" class="ajax-form" data-section="localisation">
+          {% csrf_token %}
+          <div class="form-group">
+            <div class="form-row">
+              <label for="{{ localisation_form.province.id_for_label }}">Province :</label>
+              <div class="form-field">
+                {{ localisation_form.province }}
+                {% if localisation_form.province.errors %}
+                  <ul class="errorlist">
+                    {% for error in localisation_form.province.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-row">
+              <label for="{{ localisation_form.arrondissement.id_for_label }}">Arrondissement :</label>
+              <div class="form-field">
+                {{ localisation_form.arrondissement }}
+                {% if localisation_form.arrondissement.errors %}
+                  <ul class="errorlist">
+                    {% for error in localisation_form.arrondissement.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-row">
+              <label for="{{ localisation_form.quartier.id_for_label }}">Quartier :</label>
+              <div class="form-field">
+                {{ localisation_form.quartier }}
+                {% if localisation_form.quartier.errors %}
+                  <ul class="errorlist">
+                    {% for error in localisation_form.quartier.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" name="update_localisation" class="submit-btn">Enregistrer la localisation</button>
+        </form>
+
+        <details class="conseil">
+          <summary>Conseil</summary>
+          <p>Indiquez votre localisation exacte pour faciliter les recherches par proximité.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== TÉLÉPHONE ==================== -->
+    <section class="accordion">
+      <button class="accordion-header" aria-expanded="false">
+        <span>📞 Téléphone</span>
+      </button>
+      <div class="accordion-content">
+
+        <div class="ajax-messages" id="messages-telephone">
+          {% if messages %}
+            <div class="message-box">
+              {% for message in messages %}
+                {% if 'telephone' in message.tags %}
+                  <p class="{{ message.tags }}">{{ message }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <form method="post" class="ajax-form" data-section="telephone">
+          {% csrf_token %}
+          <div class="form-group">
+            <div class="form-row">
+              <label for="{{ telephone_form.telephone.id_for_label }}">Téléphone :</label>
+              <div class="form-field">
+                {{ telephone_form.telephone }}
+                {% if telephone_form.telephone.errors %}
+                  <ul class="errorlist">
+                    {% for error in telephone_form.telephone.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" name="update_telephone" class="submit-btn">Mettre à jour le téléphone</button>
+        </form>
+
+        <details class="conseil">
+          <summary>Conseil</summary>
+          <p>Utilisez un numéro valide et joignable pour que les recruteurs puissent vous contacter facilement.</p>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="{% static 'comptes/js/complete_espace_postulant.js' %}"></script>
+</body>
+</html>

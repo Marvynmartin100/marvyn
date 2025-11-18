@@ -1,0 +1,123 @@
+/* ==============================
+   SECTION INSCRIPTION - Deux colonnes amélioré
+   ============================== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+.inscription-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 60px 20px;
+    font-family: 'Montserrat', Arial, sans-serif;
+    text-align: center;
+
+    /* Background dégradé doux */
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+}
+
+.inscription-section h1 {
+    font-size: 2.8rem;
+    margin-bottom: 50px;
+    color: #333;
+    font-weight: 700;
+}
+
+.choix-container {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    justify-content: space-between; /* sépare gauche / droite */
+    gap: 20px;
+}
+
+/* Style générique pour chaque choix */
+.choix-container a {
+    position: relative;
+    flex: 0 0 48%; /* deux colonnes */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 20px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.6s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s forwards;
+}
+
+/* Animation fade-in progressive */
+.choix-container a:nth-child(1) { animation-delay: 0.2s; }
+.choix-container a:nth-child(2) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Overlay subtil */
+.choix-container a::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: 16px;
+    background: rgba(0,0,0,0.1);
+    transition: background 0.4s ease;
+}
+
+.choix-container a:hover::before {
+    background: rgba(0,0,0,0);
+}
+
+/* Hover dynamique */
+.choix-container a:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Gradient pour chaque choix */
+.choix-container a.employeur {
+    background: linear-gradient(135deg, #00a86b, #1e90ff);
+}
+
+.choix-container a.employeur:hover {
+    background: linear-gradient(135deg, #1e90ff, #00a86b);
+}
+
+.choix-container a.postulant {
+    background: linear-gradient(135deg, #3b3b67, #2c2c54);
+}
+
+.choix-container a.postulant:hover {
+    background: linear-gradient(135deg, #2c2c54, #3b3b67);
+}
+
+/* Titres dans chaque carte */
+.choix-container a h2 {
+    margin: 0;
+    text-align: center;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .choix-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .choix-container a {
+        flex: 0 0 80%;
+        margin-bottom: 20px;
+        height: 200px;
+    }
+}

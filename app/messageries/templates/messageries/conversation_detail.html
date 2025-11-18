@@ -1,0 +1,326 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Conversation en cours - Plateforme de recrutement">
+    <link rel="stylesheet" href="{% static 'messageries/css/messageries.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Conversation avec
+        {% if request.user == conversation.utilisateur1 %}
+            {{ conversation.utilisateur2.username }}
+        {% else %}
+            {{ conversation.utilisateur1.username }}
+        {% endif %} - Plateforme Recrutement
+    </title>
+</head>
+<body>
+<div class="conversation-container">
+    <!-- Header de la conversation -->
+    <header class="conversation-header">
+        <div class="header-actions">
+            {% if request.user.profil.role == "postulant" %}
+                <a href="{% url 'liste_conversations_postulant' %}" class="btn btn-secondary back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à votre espace postulant
+                </a>
+            {% elif request.user.profil.role == "employeur" %}
+                <a href="{% url 'liste_conversations_employeur' %}" class="btn btn-secondary back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à votre espace employeur
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="conversation-info">
+            <div class="user-avatar">
+                {% if request.user == conversation.utilisateur1 %}
+                    {% if conversation.utilisateur2.profil.photo %}
+                        <img src="{{ conversation.utilisateur2.profil.photo.url }}" alt="{{ conversation.utilisateur2.username }}" class="avatar-photo">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ conversation.utilisateur2.username|first|upper }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    {% if conversation.utilisateur1.profil.photo %}
+                        <img src="{{ conversation.utilisateur1.profil.photo.url }}" alt="{{ conversation.utilisateur1.username }}" class="avatar-photo">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ conversation.utilisateur1.username|first|upper }}
+                        </div>
+                    {% endif %}
+                {% endif %}
+                <div class="online-indicator" id="onlineStatus"></div>
+            </div>
+            <div class="conversation-details">
+                <h1>
+                    {% if request.user == conversation.utilisateur1 %}
+                        {{ conversation.utilisateur2.username }}
+                    {% else %}
+                        {{ conversation.utilisateur1.username }}
+                    {% endif %}
+                </h1>
+                <div class="conversation-meta">
+                    <span class="user-role">Employeur</span>
+                    <span class="last-seen" id="lastSeen">
+                        <i class="fas fa-circle"></i>
+                        En ligne
+                    </span>
+                    <span class="message-count">
+                        {{ messages|length }} message{{ messages|length|pluralize }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barre de recherche (cachée par défaut) -->
+    <div class="search-bar hidden" id="searchBar">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Rechercher dans la conversation..." class="search-input">
+            <button class="btn btn-primary btn-sm" id="searchSubmit">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="btn btn-outline btn-sm" id="closeSearch">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <!-- Conteneur principal des messages -->
+    <main class="messages-container">
+        <!-- Indicateur de chargement des anciens messages -->
+        <div class="load-more-container">
+            <button class="btn btn-outline btn-sm" id="loadMoreMessages">
+                <i class="fas fa-history"></i>
+                Charger plus de messages
+            </button>
+        </div>
+
+        <!-- Zone des messages -->
+        <div class="messages-scroll" id="zone-messages">
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="message {% if msg.expediteur == request.user %}message-out{% else %}message-in{% endif %}"
+                         data-message-id="{{ msg.id }}"
+                         data-timestamp="{{ msg.date_envoi|date:'c' }}">
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                {% if not msg.expediteur == request.user %}
+                                <div class="message-sender">
+                                    <strong>{{ msg.expediteur.username }}</strong>
+                                </div>
+                                {% endif %}
+                                <p class="message-text">{{ msg.contenu }}</p>
+                                {% if msg.fichier %}
+                                <div class="message-attachment">
+                                    <i class="fas fa-paperclip"></i>
+                                    <span>Fichier joint</span>
+                                    <a href="{{ msg.fichier.url }}" class="download-link" download>
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="message-meta">
+                                <time class="message-time" datetime="{{ msg.date_envoi|date:'c' }}">
+                                    {{ msg.date_envoi|date:"d/m/Y à H:i" }}
+                                </time>
+
+                                <span class="message-status">
+                                    {% if msg.lu %}
+                                        <i class="fas fa-check-double read" title="Lu"></i>
+                                    {% else %}
+                                        <i class="fas fa-check unread" title="Envoyé"></i>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action-btn" title="Répondre">
+                                <i class="fas fa-reply"></i>
+                            </button>
+                            {% if msg.expediteur == request.user %}
+                            <button
+                                type="button"
+                                class="delete-message-btn"
+                                data-message-id="{{ msg.id }}"
+                                data-delete-url="{% url 'supprimer_message' msg.id %}"
+                                title="Supprimer le message"
+                            >
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <!-- État vide -->
+                <div class="empty-conversation">
+                    <div class="empty-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Commencez la conversation</h3>
+                    <p>Envoyez le premier message pour démarrer l'échange.</p>
+                    <div class="empty-suggestions">
+                        <p>Suggestions de messages :</p>
+                        <div class="suggestion-chips">
+                            <button class="suggestion-chip" data-message="Bonjour, je suis intéressé par votre offre d'emploi.">
+                                Bonjour, je suis intéressé par votre offre d'emploi.
+                            </button>
+                            <button class="suggestion-chip" data-message="Pourriez-vous m'en dire plus sur le poste ?">
+                                Pourriez-vous m'en dire plus sur le poste ?
+                            </button>
+                            <button class="suggestion-chip" data-message="Quand seriez-vous disponible pour un entretien ?">
+                                Quand seriez-vous disponible pour un entretien ?
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Indicateur de frappe -->
+        <div class="typing-indicator hidden" id="typingIndicator">
+            <div class="typing-avatar">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="typing-content">
+                <span class="typing-text">Quelqu'un est en train d'écrire...</span>
+                <span class="typing-users" id="typingUsers"></span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Zone de saisie du message -->
+    <footer class="message-composer">
+        <form id="form-envoi-message" method="POST" action="{% url 'envoyer_message' conversation.id %}" class="message-form">
+            {% csrf_token %}
+            <!-- Zone de saisie -->
+                <div class="input-container">
+                    <textarea
+                        name="contenu"
+                        id="messageInput"
+                        placeholder="Écrivez votre message..."
+                        rows="2"
+                        required
+                        maxlength="1000"></textarea>
+                    <div class="input-actions">
+                        <span class="char-count" id="charCount">0/1000</span>
+                        <button type="submit" class="btn btn-primary send-button" id="sendButton">
+                            <i class="fas fa-paper-plane"></i>
+                            <span class="send-text">Envoyer</span>
+                        </button>
+                    </div>
+                </div>
+        </form>
+
+        <!-- Suggestions de messages rapides -->
+        <div class="quick-replies">
+            <div class="quick-replies-header">
+                <span>Réponses rapides :</span>
+            </div>
+            <div class="quick-replies-list">
+                <button class="quick-reply" data-message="D'accord, merci !">
+                    D'accord, merci !
+                </button>
+                <button class="quick-reply" data-message="Je vous recontacte rapidement.">
+                    Je vous recontacte rapidement.
+                </button>
+                <button class="quick-reply" data-message="Parfait, à bientôt !">
+                    Parfait, à bientôt !
+                </button>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- Overlay de chargement -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p>Connexion à la conversation...</p>
+</div>
+
+<!-- Container pour les toasts -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Modal d'information de la conversation -->
+<div class="modal hidden" id="conversationModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Informations de la conversation</h3>
+            <button class="btn btn-icon close-modal" id="closeModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="info-section">
+                <h4>Participants</h4>
+                <div class="participants-list">
+                    <div class="participant">
+                        <div class="participant-avatar">
+                            {{ request.user.username|first|upper }}
+                        </div>
+                        <div class="participant-info">
+                            <strong>{{ request.user.username }}</strong>
+                            <span>Vous</span>
+                        </div>
+                    </div>
+                    <div class="participant">
+                        <div class="participant-avatar">
+                            {% if request.user == conversation.utilisateur1 %}
+                                {{ conversation.utilisateur2.username|first|upper }}
+                            {% else %}
+                                {{ conversation.utilisateur1.username|first|upper }}
+                            {% endif %}
+                        </div>
+                        <div class="participant-info">
+                            <strong>
+                                {% if request.user == conversation.utilisateur1 %}
+                                    {{ conversation.utilisateur2.username }}
+                                {% else %}
+                                    {{ conversation.utilisateur1.username }}
+                                {% endif %}
+                            </strong>
+                            <span>Employeur</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-section">
+                <h4>Statistiques</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ messages|length }}</span>
+                        <span class="stat-label">Messages</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="unreadCount">0</span>
+                        <span class="stat-label">Non lus</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ conversation.date_creation|date:"d/m/Y" }}</span>
+                        <span class="stat-label">Début</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const csrftoken = '{{ csrf_token }}';
+</script>
+
+<!-- Charger ton JS externe après -->
+<script src="{% static 'messageries/js/conversation_detail.js' %}"></script>
+</body>
+</html>

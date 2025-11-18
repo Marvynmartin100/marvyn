@@ -1,0 +1,254 @@
+<!-- templates/postulant/liste_candidatures.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes candidatures - Espace Postulant</title>
+    <link rel="stylesheet" href="{% static 'recrutements/css/liste_candidature.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header avec bouton de retour -->
+        <div class="header">
+            <div class="header-actions">
+                <a href="{% url 'espace_postulant' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à l'espace postulant
+                </a>
+            </div>
+            <h1>Mes candidatures</h1>
+            <p class="subtitle">Consultez et gérez l'ensemble de vos candidatures</p>
+        </div>
+
+        <!-- Messages Django -->
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Message d'erreur -->
+        {% if error %}
+            <div class="message error">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <!-- Système de tri -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <h3 class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Filtrer par statut
+                </h3>
+                <div class="sort-options">
+                    <select id="statut-filter" class="sort-select">
+                        <option value="all">Tous les statuts</option>
+                        <option value="en attente">En attente</option>
+                        <option value="acceptee">Acceptée</option>
+                        <option value="refusee">Refusée</option>
+                    </select>
+
+                    <select id="date-sort" class="sort-select">
+                        <option value="date-desc">Plus récentes</option>
+                        <option value="date-asc">Plus anciennes</option>
+                    </select>
+
+                    <div class="search-box">
+                        <input type="text" id="search-candidatures" placeholder="Rechercher une candidature..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-number" id="total-candidatures">{{ candidatures|length }}</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="en-attente-count">0</span>
+                <span class="stat-label">En attente</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="en-cours-count">0</span>
+                <span class="stat-label">En cours</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="acceptee-count">0</span>
+                <span class="stat-label">Acceptées</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="refusee-count">0</span>
+                <span class="stat-label">Refusées</span>
+            </div>
+        </div>
+
+        <!-- Tableau des candidatures -->
+        {% if candidatures %}
+            <div class="table-container">
+                <table id="candidatures-table">
+                    <thead>
+                        <tr>
+                            <th>Employeur</th>
+                            <th>Offre d'emploi</th>
+                            <th>Statut</th>
+                            <th>Date postulation</th>
+                            <th>Détails</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidatures-body">
+                        {% for candidature in candidatures %}
+                            <tr class="candidature-row"
+                                data-statut="{{ candidature.statut|lower }}"
+                                data-date="{{ candidature.date_postulation|date:'Y-m-d' }}"
+                                data-employeur="{{ candidature.offre.employeur.profil.user.username|lower }}"
+                                data-offre="{{ candidature.offre.titre|lower }}">
+                                <td>
+                                    <div class="employeur-info">
+                                        <div class="employeur-avatar">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="employeur-details">
+                                            <strong>{{ candidature.offre.employeur.profil.user.username }}</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="offre-info">
+                                        <strong class="offre-titre">{{ candidature.offre.titre }}</strong>
+                                        <div class="offre-meta">
+                                            <span class="offre-type {{ candidature.offre.type_contrat|lower }}">
+                                                {{ candidature.offre.type_contrat }}
+                                            </span>
+                                            <span class="offre-lieu">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                                {{ candidature.offre.arrondissement_emploie }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="statut-badge statut-{{ candidature.statut|lower }}">
+                                        <i class="statut-icon"></i>
+                                        {{ candidature.statut }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="date-info">
+                                        <div class="date-postule">
+                                            <i class="far fa-calendar"></i>
+                                            {{ candidature.date_postulation|date:"d/m/Y" }}
+                                        </div>
+                                        <div class="date-offre">
+                                            {{ candidature.offre.date_publication|date:"d/m/Y" }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="details-cell">
+                                        <div class="details-buttons">
+                                            <a href="{% url 'detail_offre_postulant' candidature.offre.slug %}"
+                                               class="btn btn-primary btn-sm"
+                                               title="Voir les détails de l'offre">
+                                                <i class="fas fa-eye"></i>
+                                                Voir l'offre
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-cell">
+                                        <div class="action-buttons">
+                                            {% if candidature.statut == "acceptee" %}
+                                                <a href="{% url 'creer_conversation' 'candidature' candidature.id %}"
+                                                   class="btn btn-success btn-sm"
+                                                   title="Démarrer une conversation avec l'employeur">
+                                                    <i class="fas fa-comments"></i>
+                                                    Discuter
+                                                </a>
+                                            {% endif %}
+
+                                            <form method="post" class="inline-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="candidature_id" value="{{ candidature.id }}">
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Êtes-vous sûr de vouloir annuler cette candidature ? Cette action est irréversible.')"
+                                                        title="Annuler cette candidature">
+                                                    <i class="fas fa-times"></i>
+                                                    Annuler
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Résumé du filtrage -->
+            <div class="filter-summary" id="filter-summary">
+                <div class="summary-content">
+                    <span id="visible-count">{{ candidatures|length }}</span> candidature(s) affichée(s)
+                    <button id="reset-filters" class="btn btn-outline btn-sm">
+                        <i class="fas fa-redo"></i>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- État vide -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3>Aucune candidature</h3>
+                <p>Vous n'avez postulé à aucune offre pour le moment.</p>
+                <div class="empty-actions">
+                    <a href="{% url 'liste_offres' %}" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Parcourir les offres
+                    </a>
+                    <a href="{% url 'espace_postulant' %}" class="btn btn-outline">
+                        <i class="fas fa-user"></i>
+                        Mon profil
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Actions supplémentaires -->
+        <div class="footer-actions">
+            <div class="action-group">
+                <a href="{% url 'liste_offre_postulant' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Postuler à une nouvelle offre
+                </a>
+                <a href="{% url 'espace_postulant' %}" class="btn btn-secondary">
+                    <i class="fas fa-user"></i>
+                    Mon espace personnel
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script JavaScript -->
+    <script src="{% static 'recrutements/js/liste_candidature.js' %}"></script>
+</body>
+</html>

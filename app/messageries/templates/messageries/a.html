@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Test WebSocket</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #zone-messages {
+      border: 1px solid #000; 
+      padding: 10px; 
+      height: 300px; 
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+    .message { padding: 5px; margin: 5px 0; border-radius: 4px; }
+    .message-out { background: #cce5ff; text-align: right; }
+    .message-in { background: #e2e3e5; text-align: left; }
+    #test-form { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Test WebSocket - InMemoryChannelLayer</h1>
+
+  <div id="zone-messages"></div>
+
+  <form id="test-form">
+    <input type="text" id="test-message" placeholder="Écris un message" style="width:70%;">
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Remplacez l'ID par celui d'une vraie conversation si besoin
+      const conversationId = 1; 
+
+      const ws = new WebSocket(`ws://${window.location.host}/ws/conversation/${conversationId}/`);
+
+      ws.onopen = () => {
+        console.log('✅ WebSocket connecté !');
+        showToast('WebSocket connecté', 'success');
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('📨 Message reçu:', data);
+
+        if (data.message) {
+          const zoneMessages = document.getElementById('zone-messages');
+          const div = document.createElement('div');
+          div.textContent = data.message;
+          div.className = 'message message-in';
+          zoneMessages.appendChild(div);
+          zoneMessages.scrollTop = zoneMessages.scrollHeight;
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('❌ WebSocket fermé');
+        showToast('WebSocket fermé', 'warning');
+      };
+
+      ws.onerror = (err) => {
+        console.error('⚠️ Erreur WebSocket', err);
+        showToast('Erreur WebSocket', 'error');
+      };
+
+      const testForm = document.getElementById('test-form');
+      testForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('test-message');
+        const msg = input.value.trim();
+        if (msg !== '') {
+          ws.send(JSON.stringify({message: msg}));
+          const zoneMessages = document.getElementById('zone-messages');
+          const div = document.createElement('div');
+          div.textContent = msg;
+          div.className = 'message message-out';
+          zoneMessages.appendChild(div);
+          zoneMessages.scrollTop = zoneMessages.scrollHeight;
+          input.value = '';
+        }
+      });
+
+      function showToast(msg, type='info') {
+        console.log(`Toast [${type}]:`, msg);
+      }
+    });
+  </script>
+</body>
+</html>

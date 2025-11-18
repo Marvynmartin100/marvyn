@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription | Gabonworkera</title>
+    <link rel="stylesheet" href="{% static 'comptes/css/inscription.css' %}">
+</head>
+<body>
+
+    <section class="inscription-section">
+        <div class="container">
+            <h1>Quel rôle souhaitez-vous ?</h1>
+            <p class="intro">Choisissez votre type de compte pour continuer votre inscription.</p>
+
+            <div class="choix-container">
+                <!-- Employeur -->
+                <a href="{% url 'employeur_step1' %}" class="employeur">
+                    <h2>Employeur</h2>
+                </a>
+
+                <!-- Postulant -->
+                <a href="{% url 'postulant_step1' %}" class="postulant">
+                    <h2>Postulant</h2>
+                </a>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>
+

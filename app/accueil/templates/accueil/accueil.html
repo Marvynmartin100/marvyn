@@ -1,0 +1,375 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gabonworkera est la plateforme gabonaise pour trouver un emploi, publier des annonces et connecter talents et entreprises.">
+    <meta name="keywords" content="emploi Gabon, job Gabon, stage Gabon, recrutement Gabon, mission journalière, contrat mensuel">
+
+    <!-- Open Graph (SEO & réseaux sociaux) -->
+    <meta property="og:title" content="Gabonworkera - Trouvez un emploi au Gabon">
+    <meta property="og:description" content="Plateforme gabonaise pour trouver un emploi, publier des annonces et connecter talents et entreprises.">
+    <meta property="og:image" content="{% static 'accueil/images/gwe.png' %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gabonworkera.com/">
+    <link rel="stylesheet" href="{% static 'accueil/css/accueil.css' %}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'accueil/images/gwe.png' %}" type="image/x-icon">
+
+    <title>Gabonworkera - Trouvez un emploi au Gabon</title>
+</head>
+<body id="top">
+    <div class="container" itemscope itemtype="https://schema.org/Organization">
+        <!-- Données structurées Schema.org -->
+        <meta itemprop="name" content="Gabonworkera">
+        <meta itemprop="url" content="https://gabonworkera.com">
+        <meta itemprop="logo" content="{% static 'accueil/images/gwe.png' %}">
+        <meta itemprop="contactPoint" content="contact@gabonworkera.com">
+
+        <!-- Header avec logo et titre -->
+        <!-- HEADER MODERNE -->
+<!-- ======= Barre supérieure d'information ======= -->
+    <div class="topbar">
+        <p>📍 Gabon | 🌐 Trouvez un emploi dès aujourd’hui</p>
+    </div>
+
+    <!-- ======= En-tête principal du site ======= -->
+    <header class="site-header">
+
+        <!-- Logo + Nom + Slogan -->
+        <div class="logo-title-block">
+            <a href="{% url 'accueil' %}" class="logo-name-row">
+                <div class="logo">
+                    <img src="{% static 'accueil/images/gwe.png' %}" alt="Logo Gabonworkera">
+                </div>
+                <div class="site-name">
+                    <h1>Gabonworkera</h1>
+                </div>
+            </a>
+            <h2 class="tagline">L'emploi accessible à tous au Gabon</h2>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="header-actions">
+            <a href="{% url 'connexion' %}" class="btn btn-login">Connexion</a>
+            <a href="{% url 'inscription' %}" class="btn btn-signup">Inscription</a>
+        </div>
+
+    </header>
+
+
+    <!-- NAVIGATION -->
+    <nav aria-label="Navigation principale">
+        <button class="nav-toggle" aria-label="Ouvrir le menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul>
+            <li><a href="#about">À propos</a></li>
+            <li><a href="#features1">Employeurs</a></li>
+            <li><a href="#features2">Postulants</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#creator">Le créateur</a></li>
+        </ul>
+    </nav>
+
+
+        <!-- Section principale -->
+    <main role="main">
+
+        <section id="about" class="section about" aria-labelledby="about-title">
+            <h2 id="about-title">Notre vision</h2>
+
+            <!-- Introduction globale -->
+            <div class="about-intro">
+                <p>
+                    Gabonworkera est une plateforme innovante qui facilite la rencontre entre employeurs et chercheurs d'emploi au Gabon.
+                    Notre objectif est de rendre l'emploi accessible à tous, en mettant en valeur les compétences locales et en offrant des opportunités variées.
+                </p>
+            </div>
+
+            <!-- Point 1 -->
+            <article class="about-point">
+                <h3>Pour tous les profils</h3>
+                <p>Étudiants, jeunes diplômés, travailleurs à la journée… chacun trouve sa place.</p>
+
+                <div class="image-slider" aria-label="Slider de profils">
+                    <div class="slider-track">
+                            <img src="{% static 'accueil/images/person9.jpg' %}" alt="Profil étudiant 1">
+                            <img src="{% static 'accueil/images/person2.jpg' %}" alt="Profil étudiant 2">
+                            <img src="{% static 'accueil/images/person8.jpg' %}" alt="Profil étudiant 3">
+                            <img src="{% static 'accueil/images/person7.jpg' %}" alt="Profil étudiant 4">
+                            <img src="{% static 'accueil/images/person10.jpg' %}" alt="Profil étudiant 5">
+                    </div>
+                </div>
+            </article>
+
+            <!-- Point 2 -->
+            <article class="about-point">
+                <h3>Des opportunités variées</h3>
+                <p>Stages, missions courtes, contrats mensuels : trouvez l’offre qui vous correspond.</p>
+
+                <div class="image-slider" aria-label="Slider des opportunités">
+                     <div class="slider-track">
+                        <img src="{% static 'accueil/images/skill1.jpg' %}" alt="Compétence 1">
+                        <img src="{% static 'accueil/images/skill2.jpg' %}" alt="Compétence 2">
+                        <img src="{% static 'accueil/images/skill3.jpg' %}" alt="Compétence 3">
+                        <img src="{% static 'accueil/images/skill4.jpg' %}" alt="Compétence 4">
+                    </div>
+                </div>
+            </article>
+
+            <!-- Point 3 -->
+            <article class="about-point">
+                <h3>Rencontres employeurs-talents</h3>
+                <p>Un espace pour connecter les talents locaux aux employeurs engagés.</p>
+
+                <div class="image-slider" aria-label="Slider des rencontres">
+                    <div class="slider-track">
+                        <img src="{% static 'accueil/images/connect1.jpg' %}" alt="Rencontre 1">
+                        <img src="{% static 'accueil/images/connect2.jpg' %}" alt="Rencontre 2">
+                        <img src="{% static 'accueil/images/connect3.jpg' %}" alt="Rencontre 3">
+                        <img src="{% static 'accueil/images/connect4.jpg' %}" alt="Rencontre 4">
+                        <img src="{% static 'accueil/images/connect5.jpg' %}" alt="Rencontre 5">
+                    </div>
+                </div>
+            </article>
+
+            <!-- Point 4 -->
+            <article class="about-point">
+                <h3>Valorisation des compétences</h3>
+                <p>Chaque savoir-faire compte, et chaque ambition est soutenue.</p>
+
+                <div class="image-slider" aria-label="Slider des compétences">
+                    <div class="slider-track">
+                        <img src="{% static 'accueil/images/opportunite1.jpg' %}" alt="Opportunité 1">
+                        <img src="{% static 'accueil/images/opportunite2.jpg' %}" alt="Opportunité 2">
+                        <img src="{% static 'accueil/images/opportunite3.jpg' %}" alt="Opportunité 3">
+                        <img src="{% static 'accueil/images/opportunite4.jpg' %}" alt="Opportunité 4">
+                        <img src="{% static 'accueil/images/opportunite5.jpg' %}" alt="Opportunité 5">
+                    </div>
+                </div>
+            </article>
+        </section>
+
+
+
+            <section id="features1" class="section features features-employeurs" aria-labelledby="features1-title">
+                <h2 id="features1-title">Espace Employeurs</h2>
+
+                <p>
+                    Que vous soyez entrepreneur, artisan, freelance, responsable RH ou simplement à la recherche de main-d’œuvre pour une tâche ponctuelle, Gabonworkera vous aide à trouver rapidement les profils adaptés à vos besoins.
+                </p>
+
+                <ul class="employeur-actions">
+                    <li><strong>Publiez vos annonces :</strong> décrivez votre besoin et touchez les bons candidats.</li>
+                    <li><strong>Explorez les profils :</strong> accédez à une base de talents gabonais variés et motivés.</li>
+                    <li><strong>Recevez des candidatures :</strong> suivez les postulants et contactez-les facilement.</li>
+                    <li><strong>Suivez vos recrutements :</strong> visualisez les candidatures reçues et les profils retenus.</li>
+                    <li><strong>Valorisez votre marque :</strong> présentez votre entreprise avec authenticité pour attirer les bons profils.</li>
+                    <li><strong>Construisez des relations durables :</strong> échangez avec les candidats et bâtissez une communauté engagée.</li>
+
+                </ul>
+
+                <div class="employeur-benefits">
+                    <h3>Pourquoi publier sur Gabonworkera ?</h3>
+                    <ul>
+                        <li><strong>Prise en main facile :</strong> une interface claire et intuitive, pensée pour tous les profils d’employeurs.</li>
+                        <li><strong>Visibilité locale ciblée :</strong> touchez les candidats actifs dans votre région sans intermédiaire.</li>
+                        <li><strong>Accès à des profils variés et disponibles :</strong> découvrez des talents adaptés à vos besoins.</li>
+                        <li><strong>Gain de temps :</strong> trouvez rapidement des profils disponibles et motivés.</li>
+                        <li><strong>Impact concret :</strong> chaque annonce peut changer une vie et faire avancer votre projet.</li>
+                    </ul>
+                </div>
+
+                <p class="note-employeur">
+                    Gabonworkera simplifie le recrutement local, même pour les missions courtes ou les petits boulots. Chaque annonce compte et chaque profil peut faire la différence.
+                </p>
+                <div class="cta-employeur">
+                    <a href="{% url 'employeur_step1' %}" class="btn-employeur">S’inscrire en tant qu’employeur</a>
+                </div>
+
+            </section>
+
+
+        <section id="features2" class="section features features-postulants" aria-labelledby="features2-title">
+            <h2 id="features2-title">Espace Postulants</h2>
+
+            <!-- Introduction -->
+            <p class="postulant-intro">
+                Vous êtes étudiant, jeune diplômé, travailleur à la recherche d’un revenu journalier ou en quête d’un stage ?
+                Gabonworkera est là pour vous accompagner et vous ouvrir les portes des missions et opportunités locales.
+            </p>
+
+            <!-- Actions principales -->
+            <ul class="postulant-actions">
+                <li><strong>Créez votre profil</strong>Mettez en avant vos compétences, votre parcours et vos disponibilités.</li>
+                <li><strong>Recevez des offres</strong>Soyez informé dès qu’une mission correspond à votre profil.</li>
+                <li><strong>Postulez facilement</strong>En quelques clics, exprimez votre intérêt et valorisez votre savoir-faire.</li>
+                <li><strong>Lancez votre parcours</strong>Chaque mission est une chance de progresser et de vous faire remarquer.</li>
+                <li><strong>Suivez vos candidatures</strong>Gardez une trace claire de vos démarches et soyez informé de chaque évolution.</li>
+                <li><strong>Partagez votre expérience</strong>Témoignez, inspirez et contribuez à une communauté solidaire de travailleurs gabonais.</li>
+            </ul>
+
+            <!-- Bloc bénéfices -->
+            <div class="postulant-benefits">
+                <h3>Pourquoi rejoindre Gabonworkera ?</h3>
+                <ul>
+                    <li><strong>Prise en main facile</strong> : une plateforme intuitive, accessible à tous, même sans expérience technique.</li>
+                    <li><strong>Accès rapide aux offres</strong> : trouvez des missions adaptées à votre profil, près de chez vous.</li>
+                    <li><strong>Valorisation des compétences</strong> : chaque savoir-faire compte, même les plus simples ou informels.</li>
+                    <li><strong>Ouverture à tous les parcours</strong> : stages, petits boulots, premières expériences : tout le monde a sa place.</li>
+                    <li><strong>Espace bienveillant</strong> : Gabonworkera valorise les efforts, les ambitions et les talents locaux.</li>
+                </ul>
+            </div>
+
+            <!-- Note de fin -->
+            <p class="note-postulant">
+                Que vous cherchiez un petit boulot, un stage ou une première expérience, Gabonworkera vous ouvre les portes du monde professionnel gabonais.
+                Ici, chaque profil compte — et chaque ambition mérite d’être soutenue.
+            </p>
+
+            <!-- Call to action -->
+            <div class="cta-postulant">
+                <a href="{% url 'postulant_step1' %}" class="btn-postulant">S’inscrire en tant que postulant</a>
+            </div>
+        </section>
+
+
+        <section id="contact" class="section contact" aria-labelledby="contact-title">
+          <h2 id="contact-title">Contact</h2>
+
+          <p class="contact-welcome">
+            Une question ou une suggestion ? Nous sommes à votre écoute. Chaque message compte et peut faire grandir Gabonworkera.
+          </p>
+
+
+          <form method="POST" class="contact-form" id="contact-form">
+            {% csrf_token %}
+            <fieldset>
+              <legend>Envoyez-nous un message</legend>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  {{ form.nom.label_tag }}
+                  {{ form.nom}}
+                </div>
+
+                <div class="form-group">
+                  {{ form.email.label_tag }}
+                  {{ form.email }}
+                </div>
+
+                <div class="form-group full-width">
+                  {{ form.sujet.label_tag }}
+                  {{ form.sujet }}
+                </div>
+
+                <div class="form-group full-width">
+                  {{ form.message.label_tag }}
+                  {{ form.message }}
+                </div>
+              </div>
+
+              <button type="submit" class="btn-submit">Envoyer</button>
+            </fieldset>
+
+        {% if messages %}
+          <div class="messages" id="messages" >
+            {% for message in messages %}
+              <p class="{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="form-messages" id="messages"></div>
+        {% endif %}
+          </form>
+
+          <!-- Infos contact avec style moderne -->
+            <div class="contact-info">
+                <div class="info-item">
+                    <strong>Email :</strong>
+                    <span><a href="mailto:contact@gabonworkera.com">contact@gabonworkera.com</a></span>
+                </div>
+                <div class="info-item">
+                    <strong>Téléphone :</strong>
+                    <span><a href="tel:+241740269249">+241 740 269 249</a></span>
+                </div>
+                <div class="info-item">
+                    <strong>Adresse :</strong>
+                    <span>Libreville, Gabon</span>
+                </div>
+                <div class="info-item">
+                    <strong>Zone d’activité :</strong>
+                    <span>D'abord Libreville ensuite Gabon</span>
+                </div>
+            </div>
+
+
+        <p class="social-text">Retrouvez-nous sur nos différents réseaux sociaux :</p>
+
+          <!-- Liens sociaux stylés -->
+          <nav class="social-links">
+            <ul class="social-links">
+                <li class="facebook"><img src="{% static 'icons/facebook.svg' %}" alt="Facebook"></li>
+                <li class="whatsapp"><img src="{% static 'icons/whatsapp.svg' %}" alt="WhatsApp"></li>
+            </ul>
+          </nav>
+        </section>
+
+
+
+
+        <section id="creator" class="section creator" aria-labelledby="creator-title">
+            <h2 id="creator-title">Le créateur</h2>
+
+            <p>
+                Je m’appelle Marvyn, développeur web basé à Libreville.
+                J’ai créé Gabonworkera pour répondre à un besoin concret : faciliter l’accès à l’emploi pour tous, quels que soient le parcours ou le niveau d’expérience.
+                Ce projet est le fruit de mon engagement pour une tech plus humaine, plus locale, et plus inclusive.
+            </p>
+
+            <!-- Photo du créateur -->
+            <img src="{% static 'accueil/images/marvyn2.png' %}" alt="Photo de Marvyn" class="creator-photo">
+
+            <!-- Slogan ou citation -->
+              <p class="creator-values-intro">
+                 Voici les principes qui guident mon travail au quotidien :
+              </p>
+
+
+
+            <!-- Badges compétences -->
+            <div class="creator-badges">
+                <span>Rendre le numérique accessible à tous</span>
+                <span>Contribuer à une tech plus humaine</span>
+                <span>Transformer les idées en solutions utiles</span>
+            </div>
+        </section>
+
+
+            <blockquote class="proverbe-gabonais">
+                “Le travail est la clé de la dignité.”
+                <cite>— Proverbe gabonais</cite>
+            </blockquote>
+        </main>
+
+        <!-- Footer -->
+        <footer role="contentinfo">
+            <p>&copy; 2025 Gabonworkera. Tous droits réservés.</p>
+        </footer>
+    </div>
+
+    <script src="{% static 'accueil/js/accueil_navig.js' %}"></script>
+    <script src="{% static 'accueil/js/accueil_about.js' %}"></script>
+    <script src="{% static 'accueil/js/accueil_employeur.js' %}"></script>
+    <script src="{% static 'accueil/js/accueil_postulant.js' %}"></script>
+    <script src="{% static 'accueil/js/accueil_contact.js' %}"></script>
+
+
+</body>
+</html>
