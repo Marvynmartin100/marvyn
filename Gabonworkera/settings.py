@@ -26,10 +26,7 @@ SECRET_KEY = 'django-insecure-92z@o7c30%sz=21t9gq5k%sza@pn-w33a08u&m1!(x+)q^7-67
 DEBUG = False
 
 
-ALLOWED_HOSTS = [
-    ".onrender.com",
-    "localhost",
-]
+ALLOWED_HOSTS = ['.onrender.com']
 
 
 # Application definition
@@ -66,6 +63,7 @@ CHANNEL_LAYERS = {
 MIDDLEWARE = [
 
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <--- ajouter ici
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -102,11 +100,14 @@ WSGI_APPLICATION = 'Gabonworkera.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gabonworkera_db',
-        'USER': 'NGOYABI AMVAME',
-        'PASSWORD': 'Marvynmartin2022',
-        'HOST': 'localhost',  # ou l’adresse IP du serveur MySQL
+        'NAME': 'marvyn_gabonworkera_db',
+        'USER': 'marvyn',
+        'PASSWORD': 'Marvynmartin2002',
+        'HOST': 'mysql-marvyn.alwaysdata.net',  # ou l’adresse IP du serveur MySQL
         'PORT': '3306',       # port par défaut de MySQL
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
@@ -162,3 +163,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
